@@ -1,5 +1,5 @@
 import React from 'react';
-import { 
+import {
   LayoutDashboard, 
   Briefcase, 
   Network, 
@@ -7,22 +7,26 @@ import {
   FileText, 
   Settings as SettingsIcon, 
   Shield, 
-  Plus
+  Plus,
+  Database,
+  ShieldCheck
 } from 'lucide-react';
 import { useInvestigation } from '../../context/InvestigationContext';
 import { ActivePage } from '../../types';
-import { CURRENT_INVESTIGATOR } from '../../data/mockData';
 
 interface NavItem {
   id: ActivePage;
   label: string;
   icon: React.ReactNode;
   badge?: string | number;
+  adminOnly?: boolean;
 }
 
 export const Sidebar: React.FC = () => {
-  const { activePage, navigateTo, alerts } = useInvestigation();
+  const { activePage, navigateTo, alerts, currentRole, currentInvestigator } = useInvestigation();
   const unreadAlertsCount = alerts.filter(a => !a.isRead).length;
+  const isAdmin = currentRole === 'Supervisor';
+  const isAnalyst = currentRole === 'Analyst';
 
   const navItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
@@ -35,8 +39,11 @@ export const Sidebar: React.FC = () => {
       badge: unreadAlertsCount > 0 ? unreadAlertsCount : undefined 
     },
     { id: 'reports', label: 'Reports', icon: <FileText className="w-4 h-4" /> },
+    { id: 'admin', label: 'Intelligence Database', icon: <Database className="w-4 h-4" />, adminOnly: true },
     { id: 'settings', label: 'Settings', icon: <SettingsIcon className="w-4 h-4" /> }
   ];
+
+  const visibleNavItems = navItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <aside className="w-60 bg-[#0B1220] border-r border-[#1E293B] flex flex-col h-screen shrink-0 sticky top-0 text-slate-300 select-none z-40 no-print">
@@ -60,21 +67,25 @@ export const Sidebar: React.FC = () => {
         </div>
 
         {/* Action: New Investigation */}
-        <button
-          onClick={() => navigateTo('create-case')}
-          className="mt-4 w-full py-2 px-3 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-[0.99]"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>New Investigation</span>
-        </button>
+        {!isAnalyst && (
+          <button
+            onClick={() => navigateTo('create-case')}
+            className="mt-4 w-full py-2 px-3 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-[0.99]"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Investigation</span>
+          </button>
+        )}
       </div>
 
       {/* Main Navigation List */}
       <div className="flex-1 px-3 py-4 overflow-y-auto">
         <ul className="space-y-1">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const isActive = activePage === item.id || 
-              (item.id === 'cases' && (activePage === 'case-detail' || activePage === 'create-case'));
+              (item.id === 'cases' && activePage === 'case-detail') ||
+              (item.id === 'cases' && activePage === 'create-case') ||
+              (item.id === 'admin' && activePage === 'admin');
 
             return (
               <li key={item.id}>
@@ -108,12 +119,18 @@ export const Sidebar: React.FC = () => {
       <div className="p-3.5 border-t border-[#1E293B] bg-[#0B1220]">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 text-slate-200 flex items-center justify-center font-mono font-bold text-xs">
-            AM
+            {currentInvestigator.name.split(' ').map((n: string) => n[0]).join('')}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-semibold text-white truncate">{CURRENT_INVESTIGATOR.name}</div>
-            <div className="text-[10px] text-slate-500 truncate">{CURRENT_INVESTIGATOR.unit}</div>
+            <div className="text-xs font-semibold text-white truncate">{currentInvestigator.name}</div>
+            <div className="text-[10px] text-slate-500 truncate">{currentInvestigator.unit}</div>
           </div>
+          {isAdmin && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-600/20 text-orange-400 border border-orange-600/40 flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3" />
+              {currentRole}
+            </span>
+          )}
         </div>
       </div>
     </aside>

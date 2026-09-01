@@ -17,7 +17,7 @@ import { StatusBadge } from '../components/common/StatusBadge';
 import { MonoText } from '../components/common/MonoText';
 
 export const Overview: React.FC = () => {
-  const { cases, selectedCase, caseAlerts, navigateTo } = useInvestigation();
+  const { cases, selectedCase, caseAlerts, navigateTo, currentRole } = useInvestigation();
   const leadCase = selectedCase;
   const activeCasesCount = cases.filter(caseItem => caseItem.status === 'Under Investigation' || caseItem.status === 'Monitoring').length;
   const highRiskCasesCount = cases.filter(caseItem => caseItem.riskLevel === 'HIGH').length;
@@ -38,13 +38,15 @@ export const Overview: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => navigateTo('create-case')}
-          className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-bold flex items-center gap-2 shadow-xs transition-all cursor-pointer self-start sm:self-auto active:scale-[0.99]"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Investigation</span>
-        </button>
+        {currentRole !== 'Analyst' && (
+          <button
+            onClick={() => navigateTo('create-case')}
+            className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-bold flex items-center gap-2 shadow-xs transition-all cursor-pointer self-start sm:self-auto active:scale-[0.99]"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Investigation</span>
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

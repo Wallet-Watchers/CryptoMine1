@@ -7,7 +7,12 @@ import {
   TransactionItem, 
   CampaignItem, 
   VASPEntity, 
-  AlertItem 
+  AlertItem,
+  UserRole,
+  ExtractedField,
+  VASPDatabaseEntry,
+  KnownRiskAddress,
+  ReportStatus
 } from '../types';
 import { 
   MOCK_CASES, 
@@ -16,7 +21,12 @@ import {
   MOCK_CAMPAIGN, 
   MOCK_VASP, 
   MOCK_ALERTS, 
-  MOCK_MONITORED_NODES 
+  MOCK_MONITORED_NODES,
+  MOCK_COMPLAINT,
+  MOCK_EXTRACTED_FIELDS,
+  MOCK_VASP_DATABASE,
+  MOCK_KNOWN_RISK_ADDRESSES,
+  CURRENT_INVESTIGATOR
 } from '../data/mockData';
 
 export interface ToastInfo {
@@ -28,7 +38,9 @@ export interface ToastInfo {
 
 interface InvestigationContextType {
   isAuthenticated: boolean;
-  login: (id: string, pass: string) => boolean;
+  currentRole: UserRole;
+  currentInvestigator: { name: string; unit: string };
+  login: (id: string, pass: string, role: UserRole) => boolean;
   logout: () => void;
   activePage: ActivePage;
   setActivePage: (page: ActivePage) => void;
@@ -69,6 +81,15 @@ interface InvestigationContextType {
   
   addNewCase: (newCase: CaseItem) => void;
   markAlertRead: (id: string) => void;
+
+  complaint: typeof MOCK_COMPLAINT;
+  extractedFields: ExtractedField[];
+  updateExtractedField: (key: string, value: string, verified: boolean) => void;
+  setComplaintAnalysisComplete: () => void;
+  
+  vaspDatabase: VASPDatabaseEntry[];
+  knownRiskAddresses: KnownRiskAddress[];
+  addMonitoredWallet: (address: string, label: string) => void;
 }
 
 const InvestigationContext = createContext<InvestigationContextType | undefined>(undefined);
@@ -98,6 +119,8 @@ const loadCreatedCases = (): CaseItem[] => {
 
 export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+  const [currentRole, setCurrentRole] = useState<UserRole>('Investigator');
+  const [currentInvestigator] = useState<{ name: string; unit: string }>({ name: CURRENT_INVESTIGATOR.name, unit: CURRENT_INVESTIGATOR.unit });
   const [activePage, setActivePage] = useState<ActivePage>('dashboard');
   const [activeCaseTab, setActiveCaseTab] = useState<CaseTab>('overview');
   
@@ -111,10 +134,12 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [campaign] = useState<CampaignItem>(MOCK_CAMPAIGN);
   const [vasp] = useState<VASPEntity>(MOCK_VASP);
   const [alerts, setAlerts] = useState<AlertItem[]>(MOCK_ALERTS);
-  const [monitoredNodes] = useState(MOCK_MONITORED_NODES);
+  const [monitoredNodes, setMonitoredNodes] = useState(MOCK_MONITORED_NODES);
   
   const [isMonitoringActive, setIsMonitoringActive] = useState<boolean>(true);
   const [toasts, setToasts] = useState<ToastInfo[]>([]);
+
+  const [extractedFields, setExtractedFields] = useState<ExtractedField[]>(MOCK_EXTRACTED_FIELDS);
 
   const showToast = (title: string, message: string, type: ToastInfo['type'] = 'info') => {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 4);
@@ -128,12 +153,13 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const login = (_id: string, _pass: string) => {
+  const login = (_id: string, _pass: string, role: UserRole = 'Investigator') => {
     setIsAuthenticated(true);
+    setCurrentRole(role);
     setActivePage('dashboard');
     setActiveCaseTab('overview');
     setSelectedAlertId(null);
-    showToast('Session Authenticated', 'Active Session: A. Mehta (Cyber Fraud Unit)', 'success');
+    showToast('Session Authenticated', `Active Session: A. Mehta (${role})`, 'success');
     return true;
   };
 
@@ -198,10 +224,37 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
     setAlerts(prev => prev.map(a => a.id === id ? { ...a, isRead: true, status: 'Reviewed' } : a));
   };
 
+  const updateExtractedField = (key: string, value: string, verified: boolean) => {
+    setExtractedFields(prev => prev.map(f => f.key === key ? { ...f, value, verified } : f));
+  };
+
+  const setComplaintAnalysisComplete = () => {
+    showToast('Analysis Confirmed', 'Extracted intelligence reviewed and confirmed by investigator.', 'success');
+  };
+
+  const addMonitoredWallet = (address: string, label: string) => {
+    const shortAddress = address.length > 14 ? `${address.slice(0, 6)}...${address.slice(-4)}` : address;
+    setMonitoredNodes(prev => {
+      if (prev.some(n => n.address === address)) return prev;
+      return [...prev, {
+        address,
+        shortAddress,
+        label,
+        blockchain: 'TRON' as const,
+        riskLevel: 'HIGH' as const,
+        lastActivity: 'Just added',
+        alertsCount: 0
+      }];
+    });
+    showToast('Wallet Added to Watchlist', `${shortAddress} is now actively monitored.`, 'success');
+  };
+
   return (
     <InvestigationContext.Provider
       value={{
         isAuthenticated,
+currentRole,
+        currentInvestigator,
         login,
         logout,
         activePage,
@@ -235,7 +288,14 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
         showToast,
         removeToast,
         addNewCase,
-        markAlertRead
+        markAlertRead,
+        complaint: MOCK_COMPLAINT,
+        extractedFields,
+        updateExtractedField,
+        setComplaintAnalysisComplete,
+        vaspDatabase: MOCK_VASP_DATABASE,
+        knownRiskAddresses: MOCK_KNOWN_RISK_ADDRESSES,
+        addMonitoredWallet
       }}
     >
       {children}

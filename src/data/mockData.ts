@@ -1,10 +1,14 @@
-import { 
+import {
   CaseItem, 
   WalletEntity, 
   TransactionItem, 
   CampaignItem, 
   VASPEntity, 
-  AlertItem 
+  AlertItem,
+  UserRole,
+  ExtractedField,
+  VASPDatabaseEntry,
+  KnownRiskAddress
 } from '../types';
 
 export const CURRENT_INVESTIGATOR = {
@@ -13,8 +17,57 @@ export const CURRENT_INVESTIGATOR = {
   unit: "Cyber Fraud Unit",
   rank: "Lead Financial Crimes Investigator",
   accessLevel: "Investigator / Read-Write",
+  role: "Investigator" as UserRole,
   sessionStarted: "2026-08-27T09:00:00Z"
 };
+
+export const ROLE_DEFINITIONS: { role: UserRole; description: string; permissions: string[] }[] = [
+  {
+    role: 'Analyst',
+    description: 'Read-Only — review cases, graphs, and reports without making changes.',
+    permissions: ['View cases', 'View fund flow & network', 'View reports', 'Read-only evidence']
+  },
+  {
+    role: 'Investigator',
+    description: 'Read-Write — full investigation workflow on assigned cases.',
+    permissions: ['Create cases', 'Edit evidence', 'Run tracing', 'Manage monitoring', 'Draft reports']
+  },
+  {
+    role: 'Supervisor',
+    description: 'Admin — reassign cases across investigators, review and finalize reports, access intelligence database.',
+    permissions: ['All Investigator permissions', 'Reassign cases', 'Approve / finalize reports', 'Admin intelligence database']
+  }
+];
+
+export const MOCK_COMPLAINT = {
+  id: 'CMP-FILE-2026-0421',
+  dateFiled: '25 Aug 2026',
+  source: 'Uploaded file · complaint_0421.pdf',
+  text: "I invested 50,000 USDT with a group on Telegram called @GoldenAlphaYield after they promised guaranteed monthly returns of 15%. The administrator 'Alex' directed me to transfer USDT on the TRON network to wallet TX9f81ka94jLp27Kp2. After I made my first deposit on 24 August they showed fake profit screenshots and asked me to deposit more. When I tried to withdraw my principal they blocked me. All communication was through the Telegram channel and private DMs from the account @alex_ga. The fraudulent website they referenced was goldenyield-invest.com."
+};
+
+export const MOCK_EXTRACTED_FIELDS: ExtractedField[] = [
+  { key: 'fraudType', label: 'Fraud Type', value: 'Investment Scam', verified: true },
+  { key: 'amount', label: 'Amount', value: '50,000 USDT', verified: false },
+  { key: 'contactMethod', label: 'Contact Method', value: 'Telegram (@GoldenAlphaYield / @alex_ga)', verified: true },
+  { key: 'website', label: 'Website / Platform', value: 'goldenyield-invest.com', verified: false },
+  { key: 'walletAddress', label: 'Wallet Address', value: 'TX9f81ka94jLp27Kp2', verified: false },
+  { key: 'date', label: 'Date', value: '24 Aug 2026', verified: false }
+];
+
+export const MOCK_VASP_DATABASE: VASPDatabaseEntry[] = [
+  { id: 'V-018', name: 'Binance', type: 'Centralized Exchange', blockchain: 'TRON', knownWalletCluster: 'TND2uCqGfN4rW6Vv8YmYh99a...', evidenceSource: 'Verified LEIR responses + on-chain cluster', lastVerified: '26 Aug 2026', confidence: 91 },
+  { id: 'V-021', name: 'KuCoin', type: 'Centralized Exchange', blockchain: 'TRON', knownWalletCluster: 'TKo8Qn...', evidenceSource: 'Open-source cluster research', lastVerified: '12 Aug 2026', confidence: 78 },
+  { id: 'V-034', name: 'OKX', type: 'Centralized Exchange', blockchain: 'Ethereum', knownWalletCluster: '0x6cc5...', evidenceSource: 'Exchange disclosure (cold)', lastVerified: '02 Aug 2026', confidence: 84 },
+  { id: 'V-041', name: 'Bybit', type: 'Centralized Exchange', blockchain: 'TRON', knownWalletCluster: 'TRkY9...', evidenceSource: 'OSINT + tagged feeds', lastVerified: '30 Jul 2026', confidence: 66 }
+];
+
+export const MOCK_KNOWN_RISK_ADDRESSES: KnownRiskAddress[] = [
+  { id: 'KRA-001', wallet: 'TX9f81ka94jLp27Kp2', shortAddress: 'TX9f...7Kp2', riskCategory: 'High-Risk Fraud Suspect', source: 'Case CM-2026-0017', dateAdded: '25 Aug 2026', reason: 'Direct recipient of confirmed fraud proceeds; rapid layering behaviour.' },
+  { id: 'KRA-002', wallet: 'TE5r9024lkj18Nz', shortAddress: 'TE5r...18Nz', riskCategory: 'Multi-Case Collector', source: 'Campaign CMP-004', dateAdded: '26 Aug 2026', reason: 'Shared consolidation node across 3 independent complaints.' },
+  { id: 'KRA-003', wallet: '0x71Fa98319e0A91C', shortAddress: '0x71...91C', riskCategory: 'Known Drainer', source: 'Partner Intel Feed', dateAdded: '22 Aug 2026', reason: 'Observed in phishing drainer clusters across EVM chains.' },
+  { id: 'KRA-004', wallet: 'TB7x3910amv29Lm', shortAddress: 'TB7x...29Lm', riskCategory: 'Layering Relay', source: 'Case CM-2026-0017', dateAdded: '25 Aug 2026', reason: 'Zero-balance transit node in fraud layering path.' }
+];
 
 export const MOCK_CASES: CaseItem[] = [
   {
@@ -31,6 +84,7 @@ export const MOCK_CASES: CaseItem[] = [
     retainedAmount: "2,800 USDT",
     primaryWallet: "TX9f81ka94jLp27Kp2",
     status: "Under Investigation",
+    reportStatus: "Draft",
     leadInvestigator: "A. Mehta",
     unit: "Cyber Fraud Unit",
     createdAt: "25 Aug 2026, 10:15",
@@ -146,37 +200,37 @@ export const MOCK_CASES: CaseItem[] = [
     riskContributors: [
       {
         factor: "Rapid fund movement",
-        points: 25,
-        category: "Velocity",
-        evidence: "Funds moved onward within minutes of receipt.",
-        severity: "HIGH"
-      },
-      {
-        factor: "Intermediary wallets",
         points: 20,
-        category: "Layering",
-        evidence: "Three intermediary nodes connect to the primary path.",
+        category: "Velocity",
+        evidence: "Outbound tranche of 12,400 USDT moved onward within 8 minutes of the 50,000 USDT deposit.",
         severity: "HIGH"
       },
       {
-        factor: "High transaction frequency",
+        factor: "Multiple wallet splitting",
         points: 18,
-        category: "Volume",
-        evidence: "42 transactions observed during the active analysis window.",
-        severity: "MEDIUM"
+        category: "Layering",
+        evidence: "Incoming funds split across multiple downstream addresses before relay.",
+        severity: "HIGH"
       },
       {
-        factor: "Fund splitting",
+        factor: "High-risk connections",
+        points: 25,
+        category: "Network",
+        evidence: "Direct interaction with a fraud-flagged counterparty cluster (shared collector TE5r...18Nz).",
+        severity: "HIGH"
+      },
+      {
+        factor: "Repeated consolidation",
         points: 14,
         category: "Dispersal",
-        evidence: "Incoming funds were divided across multiple downstream addresses.",
+        evidence: "Split tranches re-merged into a single collector wallet across repeated hops.",
         severity: "MEDIUM"
       },
       {
-        factor: "New counterparties",
+        factor: "Known suspicious cluster",
         points: 10,
-        category: "Network",
-        evidence: "18 counterparties interacted with 0 prior history.",
+        category: "Correlation",
+        evidence: "Address overlaps a flagged cluster recorded in the intelligence database.",
         severity: "MEDIUM"
       }
     ]
@@ -195,6 +249,7 @@ export const MOCK_CASES: CaseItem[] = [
     retainedAmount: "3,300 USDT",
     primaryWallet: "TW6p3910bc5Hs4",
     status: "Under Investigation",
+    reportStatus: "Finalized",
     leadInvestigator: "A. Mehta",
     unit: "Cyber Fraud Unit",
     createdAt: "23 Aug 2026, 16:40",
@@ -225,6 +280,7 @@ export const MOCK_CASES: CaseItem[] = [
     retainedAmount: "2,800 USDT",
     primaryWallet: "TV2k9102bc8Lm1",
     status: "Monitoring",
+    reportStatus: "Submitted",
     leadInvestigator: "A. Mehta",
     unit: "Cyber Fraud Unit",
     createdAt: "19 Aug 2026, 09:45",
@@ -255,6 +311,7 @@ export const MOCK_CASES: CaseItem[] = [
     retainedAmount: "4,200 USDT",
     primaryWallet: "TY4m8291kj2Qa8",
     status: "Monitoring",
+    reportStatus: "Finalized",
     leadInvestigator: "S. Rao",
     unit: "Cyber Fraud Unit",
     createdAt: "24 Aug 2026, 14:20",
@@ -283,6 +340,7 @@ export const MOCK_CASES: CaseItem[] = [
     retainedAmount: "0.0 ETH",
     primaryWallet: "0x71Fa98319e0A91C",
     status: "Under Investigation",
+    reportStatus: "Draft",
     leadInvestigator: "K. Sharma",
     unit: "Cyber Fraud Unit",
     createdAt: "22 Aug 2026, 11:30",
@@ -296,10 +354,84 @@ export const MOCK_CASES: CaseItem[] = [
     timeline: [],
     evidenceSignals: [],
     riskContributors: []
+  },
+  {
+    id: "CM-2026-0019",
+    title: "Task-Based Fraud — Pending On-Chain Analysis",
+    fraudType: "Task-Based Fraud",
+    riskLevel: "MEDIUM",
+    riskScore: 0,
+    blockchain: "TRON",
+    asset: "USDT",
+    reportedAmount: "68,000 USDT",
+    sentAmount: "68,000 USDT",
+    tracedAmount: "Pending analysis",
+    retainedAmount: "Pending analysis",
+    primaryWallet: "TT4w2910am7Qz2",
+    status: "Under Investigation",
+    reportStatus: "Draft",
+    leadInvestigator: "A. Mehta",
+    unit: "Cyber Fraud Unit",
+    createdAt: "27 Aug 2026, 09:10",
+    updatedAt: "27 Aug 2026, 09:10",
+    complaintText: "Victim completed simulated product-rating tasks via a Telegram bot and was promised escalating commissions. Deposited 68,000 USDT over three days before withdrawal was blocked.",
+    contactMethod: "Telegram Bot",
+    walletsIdentified: 1,
+    transactionsCount: 0,
+    intermediaryCount: 0,
+    connectedCasesCount: 0,
+    timeline: [
+      {
+        id: "T-01",
+        date: "27 Aug 2026",
+        time: "09:10",
+        title: "Complaint filed & analyzed",
+        description: "Complaint intake recorded; on-chain evidence analysis is pending.",
+        classification: "FACT"
+      }
+    ],
+    evidenceSignals: [
+      {
+        id: "SIG-01",
+        title: "Primary wallet submitted",
+        description: "Wallet TT4w...7Qz2 submitted as direct recipient; no downstream path indexed yet.",
+        classification: "OBSERVATION"
+      }
+    ],
+    riskContributors: [
+      { factor: "Initial complaint received", points: 0, category: "Intake", evidence: "Awaiting on-chain analysis.", severity: "LOW" }
+    ]
   }
 ];
 
 export const MOCK_WALLETS: Record<string, WalletEntity> = {
+  "TT4w2910am7Qz2": {
+    address: "TT4w2910am7Qz2",
+    shortAddress: "TT4w...7Qz2",
+    label: "Primary Suspect Wallet (Pending)",
+    role: "Primary Suspect",
+    blockchain: "TRON",
+    riskScore: 0,
+    riskLevel: "MEDIUM",
+    receivedAmount: "68,000 USDT",
+    sentAmount: "Pending analysis",
+    transactionCount: 0,
+    uniqueCounterparties: 0,
+    firstSeen: "27 Aug 2026, 09:10",
+    lastActivity: "Pending on-chain confirmation",
+    associatedCases: ["CM-2026-0019"],
+    indicators: [],
+    riskContributors: [],
+    evidenceSignals: [
+      {
+        id: "WSIG-01",
+        title: "Reported recipient wallet",
+        description: "Wallet submitted in complaint as direct receiving address.",
+        classification: "OBSERVATION",
+        source: "Complaint CM-2026-0019"
+      }
+    ]
+  },
   "TX9f81ka94jLp27Kp2": {
     address: "TX9f81ka94jLp27Kp2",
     shortAddress: "TX9f...7Kp2",
@@ -354,37 +486,37 @@ export const MOCK_WALLETS: Record<string, WalletEntity> = {
     riskContributors: [
       {
         factor: "Rapid fund movement",
-        points: 25,
+        points: 20,
         category: "Velocity",
         evidence: "Funds moved onward within minutes of receipt.",
         severity: "HIGH"
       },
       {
-        factor: "Intermediary wallets",
-        points: 20,
+        factor: "Multiple wallet splitting",
+        points: 18,
         category: "Layering",
-        evidence: "Three intermediary nodes connect to the primary path.",
+        evidence: "Incoming funds split across multiple downstream addresses.",
         severity: "HIGH"
       },
       {
-        factor: "High transaction frequency",
-        points: 18,
-        category: "Volume",
-        evidence: "42 transactions observed during the active analysis window.",
-        severity: "MEDIUM"
+        factor: "High-risk connections",
+        points: 25,
+        category: "Network",
+        evidence: "Interaction with a fraud-flagged counterparty cluster.",
+        severity: "HIGH"
       },
       {
-        factor: "Fund splitting",
+        factor: "Repeated consolidation",
         points: 14,
         category: "Dispersal",
-        evidence: "Incoming funds divided across multiple downstream addresses.",
+        evidence: "Split tranches re-merged into a single collector wallet.",
         severity: "MEDIUM"
       },
       {
-        factor: "New counterparties",
+        factor: "Known suspicious cluster",
         points: 10,
-        category: "Network",
-        evidence: "18 counterparties observed with no historical overlap.",
+        category: "Correlation",
+        evidence: "Overlaps a flagged intelligence-database cluster.",
         severity: "MEDIUM"
       }
     ],

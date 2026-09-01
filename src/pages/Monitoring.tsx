@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Radio, 
   Pause, 
@@ -8,7 +8,11 @@ import {
   ShieldAlert, 
   CheckCircle2, 
   ArrowRight,
-  ExternalLink
+  ExternalLink,
+  Plus,
+  Wallet,
+  X,
+  Check
 } from 'lucide-react';
 import { useInvestigation } from '../context/InvestigationContext';
 import { RiskBadge } from '../components/common/RiskBadge';
@@ -21,8 +25,26 @@ export const Monitoring: React.FC = () => {
     caseWallets,
     isMonitoringActive, 
     toggleMonitoring, 
-    navigateTo 
+    navigateTo,
+    monitoredNodes,
+    addMonitoredWallet,
+    showToast
   } = useInvestigation();
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [newAddress, setNewAddress] = useState('');
+  const [newLabel, setNewLabel] = useState('');
+
+  const handleAddWallet = () => {
+    if (!newAddress.trim()) {
+      showToast('Missing Address', 'Enter a wallet address to add to the watchlist.', 'warning');
+      return;
+    }
+    addMonitoredWallet(newAddress.trim(), newLabel.trim() || `Watchlist entry — ${newAddress.slice(0, 6)}...${newAddress.slice(-4)}`);
+    setNewAddress('');
+    setNewLabel('');
+    setIsAddOpen(false);
+  };
+
   const monitoredCaseWallets = caseWallets.length > 0 ? caseWallets : [{
     address: selectedCase.primaryWallet,
     shortAddress: `${selectedCase.primaryWallet.slice(0, 6)}...${selectedCase.primaryWallet.slice(-4)}`,
@@ -45,27 +67,91 @@ export const Monitoring: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={toggleMonitoring}
-          className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-auto shadow-2xs ${
-            isMonitoringActive
-              ? 'bg-slate-900 hover:bg-slate-800 text-white'
-              : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-          }`}
-        >
-          {isMonitoringActive ? (
-            <>
-              <Pause className="w-3.5 h-3.5 text-amber-400" />
-              <span>Pause Surveillance</span>
-            </>
-          ) : (
-            <>
-              <Play className="w-3.5 h-3.5 text-white" />
-              <span>Resume Surveillance</span>
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => setIsAddOpen(prev => !prev)}
+            className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer shadow-2xs"
+          >
+            <Plus className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Add Wallet to Watchlist</span>
+          </button>
+
+          <button
+            onClick={toggleMonitoring}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-auto shadow-2xs ${
+              isMonitoringActive
+                ? 'bg-slate-900 hover:bg-slate-800 text-white'
+                : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+            }`}
+          >
+            {isMonitoringActive ? (
+              <>
+                <Pause className="w-3.5 h-3.5 text-amber-400" />
+                <span>Pause Surveillance</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5 text-white" />
+                <span>Resume Surveillance</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Add Wallet Form */}
+      {isAddOpen && (
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-3 animate-in slide-in-from-top-2 duration-150">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="micro-label text-slate-500">ADD TO WATCHLIST</span>
+              <h3 className="text-sm font-bold text-slate-900">New monitored address</h3>
+            </div>
+            <button
+              onClick={() => setIsAddOpen(false)}
+              className="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label className="block font-medium text-slate-700 mb-1">Wallet Address *</label>
+              <div className="relative">
+                <Wallet className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={newAddress}
+                  onChange={(e) => setNewAddress(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-mono text-slate-900 outline-none focus:border-orange-500"
+                  placeholder="e.g. TX9f81ka94jLp27Kp2"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block font-medium text-slate-700 mb-1">Label (optional)</label>
+              <input
+                type="text"
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 outline-none focus:border-orange-500"
+                placeholder="e.g. New intermediary hop"
+              />
+            </div>
+          </div>
+
+          <div className="pt-1 flex justify-end">
+            <button
+              onClick={handleAddWallet}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>Add to Watchlist</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Two Column Layout: Watchlist & Recent Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -80,6 +166,11 @@ export const Monitoring: React.FC = () => {
               <span className={`w-2 h-2 rounded-full ${isMonitoringActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
               <span className="text-[11px] font-mono text-slate-500">{isMonitoringActive ? 'Active' : 'Paused'}</span>
             </div>
+          </div>
+
+          <div className="p-2.5 bg-emerald-50/60 border border-emerald-200 rounded-lg text-[11px] text-emerald-900 flex items-start gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600 mt-0.5" />
+            <span><strong>Auto-enrollment:</strong> wallets reaching Stage 3 (intermediary layering detected) in the case workflow are automatically added to this watchlist.</span>
           </div>
 
           <div className="divide-y divide-slate-100 text-xs">

@@ -6,13 +6,15 @@ interface RiskBadgeProps {
   score?: number;
   size?: 'sm' | 'md' | 'lg';
   showScore?: boolean;
+  onClick?: () => void;
 }
 
 export const RiskBadge: React.FC<RiskBadgeProps> = ({ 
   level, 
   score, 
   size = 'md',
-  showScore = true 
+  showScore = true,
+  onClick 
 }) => {
   const getStyles = () => {
     switch (level) {
@@ -53,7 +55,10 @@ export const RiskBadge: React.FC<RiskBadgeProps> = ({
 
   if (size === 'lg') {
     return (
-      <div className={`inline-flex items-center gap-3 px-3.5 py-1.5 rounded-md border ${style.bg}`}>
+      <div 
+        onClick={onClick} 
+        className={`inline-flex items-center gap-3 px-3.5 py-1.5 rounded-md border ${style.bg}${onClick ? ' cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+      >
         <span className={`w-2.5 h-2.5 rounded-full ${style.dot} animate-pulse`} />
         <span className="font-semibold tracking-wide text-sm">{style.badgeText}</span>
         {showScore && score !== undefined && (
@@ -68,7 +73,7 @@ export const RiskBadge: React.FC<RiskBadgeProps> = ({
   const sizeClasses = size === 'sm' ? 'px-1.5 py-0.5 text-[11px]' : 'px-2 py-0.5 text-xs';
 
   return (
-    <span className={`inline-flex items-center gap-1.5 font-medium rounded border ${style.bg} ${sizeClasses}`}>
+    <span onClick={onClick} className={`inline-flex items-center gap-1.5 font-medium rounded border ${style.bg} ${sizeClasses}${onClick ? ' cursor-pointer hover:opacity-80 transition-opacity' : ''}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
       <span className="tracking-wide">{level}</span>
       {showScore && score !== undefined && (

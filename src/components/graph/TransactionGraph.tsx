@@ -16,7 +16,12 @@ import {
   CheckCircle2,
   Sparkles,
   Play,
-  Filter
+  Filter,
+  Copy,
+  CopyCheck,
+  ArrowDown,
+  Settings2,
+  ScanSearch
 } from 'lucide-react';
 import { useInvestigation } from '../../context/InvestigationContext';
 import { RiskBadge } from '../common/RiskBadge';
@@ -56,6 +61,8 @@ interface GraphEdge {
   status: string;
   isPrimaryPath: boolean;
   hopNumber: number;
+  blockNumber?: string;
+  txStatus?: 'Confirmed' | 'Pending' | 'Unconfirmed';
 }
 
 const INITIAL_NODES: GraphNode[] = [
@@ -217,7 +224,9 @@ const INITIAL_EDGES: GraphEdge[] = [
     risk: 'HIGH',
     status: 'Initial Fraud Deposit',
     isPrimaryPath: true,
-    hopNumber: 0
+    hopNumber: 0,
+    blockNumber: '#6491028',
+    txStatus: 'Confirmed'
   },
   {
     id: 'E2',
@@ -230,7 +239,9 @@ const INITIAL_EDGES: GraphEdge[] = [
     risk: 'HIGH',
     status: 'Rapid Outward Layering',
     isPrimaryPath: true,
-    hopNumber: 1
+    hopNumber: 1,
+    blockNumber: '#6491104',
+    txStatus: 'Confirmed'
   },
   {
     id: 'E3',
@@ -243,7 +254,9 @@ const INITIAL_EDGES: GraphEdge[] = [
     risk: 'HIGH',
     status: 'Transit Hop 2',
     isPrimaryPath: true,
-    hopNumber: 2
+    hopNumber: 2,
+    blockNumber: '#6491166',
+    txStatus: 'Confirmed'
   },
   {
     id: 'E4',
@@ -256,7 +269,9 @@ const INITIAL_EDGES: GraphEdge[] = [
     risk: 'MEDIUM',
     status: 'Collector Aggregation',
     isPrimaryPath: true,
-    hopNumber: 3
+    hopNumber: 3,
+    blockNumber: '#6491201',
+    txStatus: 'Confirmed'
   },
   {
     id: 'E5',
@@ -269,7 +284,9 @@ const INITIAL_EDGES: GraphEdge[] = [
     risk: 'MEDIUM',
     status: 'Likely Exchange Deposit',
     isPrimaryPath: true,
-    hopNumber: 4
+    hopNumber: 4,
+    blockNumber: '#6491210',
+    txStatus: 'Pending'
   },
   {
     id: 'E-BRANCH-14',
@@ -282,7 +299,9 @@ const INITIAL_EDGES: GraphEdge[] = [
     risk: 'HIGH',
     status: 'Correlated Inflow (CM-0014)',
     isPrimaryPath: false,
-    hopNumber: 1
+    hopNumber: 1,
+    blockNumber: '#6490890',
+    txStatus: 'Confirmed'
   },
   {
     id: 'E-BRANCH-09',
@@ -295,26 +314,104 @@ const INITIAL_EDGES: GraphEdge[] = [
     risk: 'MEDIUM',
     status: 'Correlated Inflow (CM-0009)',
     isPrimaryPath: false,
-    hopNumber: 1
+    hopNumber: 1,
+    blockNumber: '#6491150',
+    txStatus: 'Unconfirmed'
   }
 ];
+
+const getBlockchainExplorerUrl = (txHash: string) => {
+  const cleaned = txHash.replace(/\.\.\./g, '');
+  return `https://tronscan.org/#/transaction/${cleaned}`;
+};
+
+const TX_STATUS_STYLES: Record<string, string> = {
+  Confirmed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  Pending: 'bg-amber-50 text-amber-800 border-amber-200',
+  Unconfirmed: 'bg-slate-100 text-slate-600 border-slate-200'
+};
 
 export const TransactionGraph: React.FC<{
   caseData: CaseItem;
   initialSelectedNodeId?: string;
   height?: string;
   showCampaignBranches?: boolean;
+  networkMode?: boolean;
+  sharedWalletIds?: string[];
 }> = ({
   caseData,
   initialSelectedNodeId = 'TX9f81ka94jLp27Kp2',
   height = 'h-[620px]',
-  showCampaignBranches = true
+  showCampaignBranches = true,
+  networkMode = false,
+  sharedWalletIds = []
 }) => {
   const { navigateTo, showToast } = useInvestigation();
   const isDemoCase = caseData.id === 'CM-2026-0017';
   const hasPendingAnalysis = !isDemoCase && caseData.transactionsCount === 0 && caseData.intermediaryCount === 0;
   const caseEvidenceClassification = caseData.evidenceSignals[0]?.classification ?? 'OBSERVATION';
-  const caseNodes = useMemo<GraphNode[]>(() => isDemoCase ? INITIAL_NODES : [
+
+  const PENDING_TRACE_NODES: GraphNode[] = [
+    {
+      id: `${caseData.id}-source`, label: 'Complainant Source', sublabel: 'Reported victim transfer',
+      role: 'Victim / Source', risk: 'SAFE', riskScore: 5, x: 250, y: 260,
+      amount: caseData.reportedAmount, blockchain: caseData.blockchain, classification: 'FACT',
+      txCount: 1, firstSeen: caseData.createdAt, lastSeen: caseData.createdAt, hopLevel: 0
+    },
+    {
+      id: `${caseData.id}-hop1`, label: `${caseData.primaryWallet.slice(0, 6)}...${caseData.primaryWallet.slice(-4)}`,
+      sublabel: 'Primary Suspect Wallet', address: caseData.primaryWallet, role: 'Primary Suspect',
+      risk: 'HIGH', riskScore: 71, x: 620, y: 260,
+      amount: caseData.reportedAmount, blockchain: caseData.blockchain, classification: 'OBSERVATION',
+      txCount: 6, firstSeen: caseData.createdAt, lastSeen: caseData.updatedAt, hopLevel: 0
+    },
+    {
+      id: `${caseData.id}-hop2`, label: 'TT3h...9Lm', sublabel: 'Intermediary 1', address: 'TT3h8910am19Lm',
+      role: 'Intermediary 1', risk: 'HIGH', riskScore: 63, x: 980, y: 200,
+      amount: '41,000 USDT', blockchain: caseData.blockchain, classification: 'OBSERVATION',
+      txCount: 4, firstSeen: caseData.createdAt, lastSeen: caseData.updatedAt, hopLevel: 1
+    },
+    {
+      id: `${caseData.id}-hop3`, label: 'TE5r...18Nz', sublabel: 'Collector / Destination', address: 'TE5r9024lkj18Nz',
+      role: 'Collector / Destination', risk: 'MEDIUM', riskScore: 44, x: 980, y: 420,
+      amount: '27,500 USDT', blockchain: caseData.blockchain, classification: 'DERIVED',
+      txCount: 3, firstSeen: caseData.createdAt, lastSeen: caseData.updatedAt, hopLevel: 2
+    },
+    {
+      id: `${caseData.id}-vasp`, label: 'V-018', sublabel: 'Likely Exchange Cluster', address: 'V-018',
+      role: 'VASP Candidate', risk: 'MEDIUM', riskScore: 40, x: 1350, y: 420,
+      amount: 'Sweep', blockchain: caseData.blockchain, classification: 'POSSIBLE',
+      txCount: 0, firstSeen: caseData.createdAt, lastSeen: caseData.updatedAt, hopLevel: 3
+    }
+  ];
+
+  const PENDING_TRACE_EDGES: GraphEdge[] = [
+    {
+      id: `${caseData.id}-trace-edge-1`, from: `${caseData.id}-source`, to: caseData.primaryWallet,
+      amount: caseData.reportedAmount, txHash: '0x11ab...8890', timestamp: '27 Aug 2026, 12:10',
+      classification: 'FACT', risk: 'HIGH', status: 'Initial Fraud Deposit', isPrimaryPath: true, hopNumber: 0,
+      blockNumber: '#6491902', txStatus: 'Confirmed'
+    },
+    {
+      id: `${caseData.id}-trace-edge-2`, from: caseData.primaryWallet, to: `${caseData.id}-hop2`,
+      amount: '41,000 USDT', txHash: '0x7e4a...91cd', timestamp: '27 Aug 2026, 12:21',
+      classification: 'OBSERVATION', risk: 'HIGH', status: 'Rapid Outward Layering', isPrimaryPath: true, hopNumber: 1,
+      blockNumber: '#6491914', txStatus: 'Confirmed'
+    },
+    {
+      id: `${caseData.id}-trace-edge-3`, from: `${caseData.id}-hop2`, to: `${caseData.id}-hop3`,
+      amount: '27,500 USDT', txHash: '0x3c19...a7bf', timestamp: '27 Aug 2026, 12:47',
+      classification: 'DERIVED', risk: 'HIGH', status: 'Transit to Collector', isPrimaryPath: true, hopNumber: 2,
+      blockNumber: '#6491930', txStatus: 'Confirmed'
+    },
+    {
+      id: `${caseData.id}-trace-edge-4`, from: `${caseData.id}-hop3`, to: `${caseData.id}-vasp`,
+      amount: 'Sweep Batch', txHash: '0x902a...8831', timestamp: '27 Aug 2026, 13:05',
+      classification: 'POSSIBLE', risk: 'MEDIUM', status: 'Likely Exchange Deposit', isPrimaryPath: true, hopNumber: 3,
+      blockNumber: '#6491941', txStatus: 'Pending'
+    }
+  ];
+  const baseCaseNodes = useMemo<GraphNode[]>(() => isDemoCase ? INITIAL_NODES : [
     {
       id: `${caseData.id}-source`, label: 'Complainant Source', sublabel: 'Reported victim transfer',
       role: 'Victim / Source', risk: 'SAFE', riskScore: 5, x: 250, y: 260,
@@ -329,14 +426,18 @@ export const TransactionGraph: React.FC<{
       txCount: caseData.transactionsCount, firstSeen: caseData.createdAt, lastSeen: caseData.updatedAt, hopLevel: 0
     }
   ], [caseData, caseEvidenceClassification, hasPendingAnalysis, isDemoCase]);
-  const caseEdges = useMemo<GraphEdge[]>(() => isDemoCase ? INITIAL_EDGES : hasPendingAnalysis ? [] : [{
+  const caseNodes = hasPendingAnalysis ? PENDING_TRACE_NODES : baseCaseNodes;
+  const baseCaseEdges = useMemo<GraphEdge[]>(() => isDemoCase ? INITIAL_EDGES : hasPendingAnalysis ? [] : [{
     id: `${caseData.id}-reported-transfer`, from: `${caseData.id}-source`, to: caseData.primaryWallet,
     amount: caseData.reportedAmount, txHash: 'No transaction hash supplied', timestamp: caseData.createdAt,
-    classification: caseEvidenceClassification, risk: caseData.riskLevel, status: 'Reported transfer', isPrimaryPath: true, hopNumber: 0
+    classification: caseEvidenceClassification, risk: caseData.riskLevel, status: 'Reported transfer', isPrimaryPath: true, hopNumber: 0,
+    blockNumber: 'Awaiting index', txStatus: 'Unconfirmed'
   }], [caseData, caseEvidenceClassification, hasPendingAnalysis, isDemoCase]);
-  const [nodes, setNodes] = useState<GraphNode[]>(caseNodes);
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(initialSelectedNodeId);
+  const caseEdges = hasPendingAnalysis ? PENDING_TRACE_EDGES : baseCaseEdges;
+  const [nodes, setNodes] = useState<GraphNode[]>(hasPendingAnalysis ? baseCaseNodes.slice(0, 2) : caseNodes);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(hasPendingAnalysis ? null : initialSelectedNodeId);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
   const [zoom, setZoom] = useState<number>(1);
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDraggingCanvas, setIsDraggingCanvas] = useState<boolean>(false);
@@ -347,6 +448,12 @@ export const TransactionGraph: React.FC<{
   const [hopDepthFilter, setHopDepthFilter] = useState<number>(4);
   const [isSweeping, setIsSweeping] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [traceDepth, setTraceDepth] = useState<number>(3);
+  const [traceOutgoing, setTraceOutgoing] = useState<boolean>(true);
+  const [traceIncoming, setTraceIncoming] = useState<boolean>(false);
+  const [stopAtVasp, setStopAtVasp] = useState<boolean>(true);
+  const [isTracing, setIsTracing] = useState<boolean>(false);
+  const [hasTraced, setHasTraced] = useState<boolean>(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -358,6 +465,7 @@ export const TransactionGraph: React.FC<{
   });
 
   const visibleEdges = caseEdges.filter(e => {
+    if (hasPendingAnalysis && !hasTraced) return false;
     if (!branchesVisible && !e.isPrimaryPath) return false;
     if (e.hopNumber > hopDepthFilter) return false;
     return true;
@@ -413,8 +521,82 @@ export const TransactionGraph: React.FC<{
     }, 4500);
   };
 
+  const applyTraceDepth = (depth: number) => {
+    setHopDepthFilter(depth);
+    setSelectedEdgeId(null);
+  };
+
+  const handleTraceFunds = () => {
+    if (isTracing) return;
+    setIsTracing(true);
+
+    if (hasPendingAnalysis && !hasTraced) {
+      showToast('Tracing Funds', `Executing on-chain trace from ${caseData.primaryWallet.slice(0, 6)}...${caseData.primaryWallet.slice(-4)} — depth ${traceDepth}, outgoing ${traceOutgoing ? 'on' : 'off'}, incoming ${traceIncoming ? 'on' : 'off'}${stopAtVasp ? ', stopping at VASP cluster' : ''}.`, 'info');
+      const depthLimitedEdges = PENDING_TRACE_EDGES.filter(e => e.hopNumber <= Math.min(traceDepth, stopAtVasp ? 3 : 4));
+      const reachableNodes = new Set(depthLimitedEdges.flatMap(e => [e.from, e.to]));
+
+      setTimeout(() => {
+        setNodes(PENDING_TRACE_NODES.filter(n => reachableNodes.has(n.id) || n.id === `${caseData.id}-source`));
+        setSelectedNodeId(caseData.primaryWallet);
+      }, 1600);
+
+      setTimeout(() => {
+        setNodes(prev => PENDING_TRACE_NODES.filter(n => reachableNodes.has(n.id) || n.id === `${caseData.id}-source`));
+        setHasTraced(true);
+        setIsTracing(false);
+        showToast('Trace Complete', `${caseData.id}: ${PENDING_TRACE_EDGES.length} transfers across ${reachableNodes.size} wallets indexed. Report marked draft — re-run to extend depth.`, 'success');
+      }, 3200);
+      return;
+    }
+
+    setTimeout(() => {
+      setIsTracing(false);
+      showToast('Trace Complete', `${caseData.id}: tracing re-run at depth ${traceDepth}. No new downstream wallets detected beyond recorded path.`, 'success');
+      setSelectedEdgeId(null);
+    }, 1800);
+  };
+
+  const selectNode = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedNodeId(id);
+    setSelectedEdgeId(null);
+  };
+
   const selectedNode = visibleNodes.find(n => n.id === selectedNodeId);
   const selectedEdge = visibleEdges.find(e => e.id === selectedEdgeId);
+
+  const resolveNodeRef = (id: string) => {
+    if (id === 'VICTIM_NODE') return { id: 'victim', address: undefined, label: 'Complainant / Source' };
+    const node = visibleNodes.find(n => n.id === id);
+    if (node?.address) return { id: node.id, address: node.address, label: node.label };
+    if (node) return { id: node.id, address: undefined, label: node.label };
+    return { id, address: undefined, label: id };
+  };
+
+  const copyToClipboard = async (value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = value;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 1500);
+  };
+
+  const jumpToNode = (id: string) => {
+    if (id === 'victim' || id === 'VICTIM_NODE') {
+      setSelectedNodeId('VICTIM_NODE');
+      setSelectedEdgeId(null);
+      return;
+    }
+    setSelectedNodeId(id);
+    setSelectedEdgeId(null);
+  };
 
   const getNodeInsight = (node: GraphNode) => {
     if (hasPendingAnalysis) {
@@ -459,7 +641,7 @@ export const TransactionGraph: React.FC<{
           <span className="text-slate-600">|</span>
           <span className="text-xs text-slate-300 font-mono">Case: {caseData.id}</span>
           <span className="text-slate-600">|</span>
-          <span className="text-xs text-emerald-400 font-mono font-medium">{hasPendingAnalysis ? 'Pending analysis' : `${caseData.tracedAmount} Traced`}</span>
+          <span className="text-xs text-emerald-400 font-mono font-medium">{hasPendingAnalysis ? (hasTraced ? 'Traced — awaiting confirmation' : 'Pending analysis') : `${caseData.tracedAmount} Traced`}</span>
         </div>
 
         {/* Action: Simulate Live Sweep */}
@@ -684,6 +866,7 @@ export const TransactionGraph: React.FC<{
           {/* Render Nodes */}
           {visibleNodes.map((node) => {
             const isSelected = selectedNodeId === node.id;
+            const isShared = !!node.address && sharedWalletIds.includes(node.address);
             const colors = getNodeColor(node);
 
             return (
@@ -720,6 +903,19 @@ export const TransactionGraph: React.FC<{
                   className="transition-transform duration-150 group-hover:scale-105 shadow-lg"
                   filter={node.risk === 'HIGH' ? "url(#glow-high)" : undefined}
                 />
+
+                {/* Shared wallet pulsing highlight (network mode) */}
+                {isShared && (
+                  <circle
+                    r="38"
+                    fill="none"
+                    stroke="#a259ef"
+                    strokeWidth="2.5"
+                    strokeDasharray="3,3"
+                    className="animate-spin"
+                    style={{ animationDuration: '6s' }}
+                  />
+                )}
 
                 {/* Inner icon/text */}
                 <text
@@ -771,16 +967,78 @@ export const TransactionGraph: React.FC<{
                     x="0"
                     y="13"
                     textAnchor="middle"
-                    fill="#94a3b8"
+                    fill={isShared ? '#a259ef' : '#94a3b8'}
                     fontSize="8"
                   >
-                    {node.sublabel}
+                    {isShared ? `${node.sublabel} · Shared` : node.sublabel}
                   </text>
                 </g>
               </g>
             );
           })}
         </svg>
+      </div>
+
+      {/* Automatic Tracing Controls */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 w-max max-w-[calc(100%-2rem)]">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 bg-slate-950/90 border border-slate-700/80 backdrop-blur-md px-3.5 py-2 rounded-lg shadow-lg text-xs">
+          <span className="text-[10px] font-bold text-orange-400 uppercase tracking-wider flex items-center gap-1.5">
+            <Settings2 className="w-3 h-3" />
+            Auto-Trace
+          </span>
+
+          {/* Depth stepper */}
+          <div className="flex items-center gap-1.5 text-slate-300">
+            <span className="text-[11px] text-slate-400">Depth</span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => applyTraceDepth(Math.max(0, hopDepthFilter - 1))}
+                disabled={hopDepthFilter <= 0 || isTracing}
+                className="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center disabled:opacity-40 cursor-pointer"
+              >
+                −
+              </button>
+              <span className="w-5 text-center font-mono text-orange-400">{hopDepthFilter}</span>
+              <button
+                onClick={() => applyTraceDepth(Math.min(5, hopDepthFilter + 1))}
+                disabled={isTracing}
+                className="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center justify-center disabled:opacity-40 cursor-pointer"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          {/* Direction checkboxes */}
+          <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer">
+            <input type="checkbox" checked={traceOutgoing} onChange={(e) => setTraceOutgoing(e.target.checked)} className="accent-orange-500 w-3 h-3 cursor-pointer" />
+            <span className="text-[11px]">Outgoing</span>
+          </label>
+          <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer">
+            <input type="checkbox" checked={traceIncoming} onChange={(e) => setTraceIncoming(e.target.checked)} className="accent-orange-500 w-3 h-3 cursor-pointer" />
+            <span className="text-[11px]">Incoming</span>
+          </label>
+          <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer">
+            <input type="checkbox" checked={stopAtVasp} onChange={(e) => setStopAtVasp(e.target.checked)} className="accent-orange-500 w-3 h-3 cursor-pointer" />
+            <span className="text-[11px]">Stop at known VASP</span>
+          </label>
+
+          {/* Trace Funds CTA */}
+          <button
+            onClick={handleTraceFunds}
+            disabled={isTracing}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow transition-all cursor-pointer disabled:opacity-60 disabled:cursor-wait ${
+              isTracing ? 'bg-orange-500 text-white animate-pulse' : 'bg-orange-600 hover:bg-orange-500 text-white'
+            }`}
+          >
+            <ScanSearch className={`w-3.5 h-3.5 ${isTracing ? 'animate-spin' : ''}`} />
+            <span>{isTracing ? 'Tracing…' : hasPendingAnalysis && !hasTraced ? 'Trace Funds' : 'Re-run Trace'}</span>
+          </button>
+
+          {hasPendingAnalysis && isTracing && (
+            <span className="text-[10px] text-amber-400 font-mono">Indexing on-chain activity…</span>
+          )}
+        </div>
       </div>
 
       {/* Bottom Classification Legend Bar */}
@@ -905,12 +1163,56 @@ export const TransactionGraph: React.FC<{
                 <span className="text-[10px] font-mono uppercase text-slate-500">TRANSFER DETAILS</span>
                 <h4 className="text-xl font-mono font-bold text-orange-400 mt-0.5">{selectedEdge.amount}</h4>
                 <p className="text-xs text-slate-400">{selectedEdge.status}</p>
+                {selectedEdge.txStatus && (
+                  <span className={`inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${TX_STATUS_STYLES[selectedEdge.txStatus]}`}>
+                    {selectedEdge.txStatus === 'Confirmed' ? <CheckCircle2 className="w-2.5 h-2.5" /> : selectedEdge.txStatus === 'Pending' ? <Radio className="w-2.5 h-2.5" /> : <Info className="w-2.5 h-2.5" />}
+                    {selectedEdge.txStatus}
+                  </span>
+                )}
+              </div>
+
+              {/* From / To wallet references */}
+              <div className="text-xs">
+                <div className="flex items-center justify-between rounded-lg bg-slate-900/80 border border-slate-800 p-2.5 mb-1.5">
+                  <span className="text-slate-400 w-14 shrink-0">From</span>
+                  {(() => { const ref = resolveNodeRef(selectedEdge.from); return (
+                    <button
+                      onClick={() => jumpToNode(selectedEdge.from)}
+                      className="flex-1 min-w-0 text-left cursor-pointer group/ref hover:text-orange-400 transition-colors"
+                    >
+                      <span className="block font-mono font-semibold text-slate-200 truncate group-hover/ref:text-orange-400">{ref.address ?? ref.label}</span>
+                      <span className="block text-[10px] text-slate-500 truncate">
+                        {ref.address ? ref.label : ref.label}
+                      </span>
+                    </button>
+                  ); })()}
+                </div>
+                <div className="flex items-center justify-between rounded-lg bg-slate-900/80 border border-slate-800 p-2.5">
+                  <span className="text-slate-400 w-14 shrink-0">To</span>
+                  {(() => { const ref = resolveNodeRef(selectedEdge.to); return (
+                    <button
+                      onClick={() => jumpToNode(selectedEdge.to)}
+                      className="flex-1 min-w-0 text-left cursor-pointer group/ref hover:text-orange-400 transition-colors"
+                    >
+                      <span className="block font-mono font-semibold text-slate-200 truncate group-hover/ref:text-orange-400">{ref.address ?? ref.label}</span>
+                      <span className="block text-[10px] text-slate-500 truncate">{ref.label}</span>
+                    </button>
+                  ); })()}
+                </div>
+                <ArrowDown className="w-4 h-4 text-slate-600 mx-auto -my-0.5" />
               </div>
 
               <div>
                 <span className="text-[10px] font-mono uppercase text-slate-500">TRANSACTION HASH</span>
-                <div className="mt-1">
+                <div className="mt-1 flex items-center gap-2">
                   <MonoText value={selectedEdge.txHash} />
+                  <button
+                    onClick={() => copyToClipboard(selectedEdge.txHash)}
+                    className="p-1.5 rounded-md border border-slate-700 text-slate-400 hover:text-orange-400 hover:border-orange-500/60 transition-colors cursor-pointer"
+                    title="Copy transaction hash"
+                  >
+                    {isCopied ? <CopyCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
                 </div>
               </div>
 
@@ -919,6 +1221,12 @@ export const TransactionGraph: React.FC<{
                   <span className="text-slate-400">Timestamp:</span>
                   <span className="font-mono text-slate-200">{selectedEdge.timestamp}</span>
                 </div>
+                {selectedEdge.blockNumber && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Block:</span>
+                    <span className="font-mono text-slate-200">{selectedEdge.blockNumber}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-slate-400">Hop Distance:</span>
                   <span className="font-mono text-slate-200">Hop {selectedEdge.hopNumber}</span>
@@ -929,10 +1237,17 @@ export const TransactionGraph: React.FC<{
                 </div>
               </div>
 
-              <div className="pt-2">
+              <div className="grid grid-cols-1 gap-2 pt-1">
+                <button
+                  onClick={() => window.open(getBlockchainExplorerUrl(selectedEdge.txHash), '_blank', 'noopener,noreferrer')}
+                  className="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>View on Blockchain Explorer</span>
+                </button>
                 <button
                   onClick={() => navigateTo('case-detail', { caseId: caseData.id, tab: 'fund-flow' })}
-                  className="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="w-full py-2 px-3 bg-slate-900 border border-slate-700 hover:border-slate-600 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   <span>Inspect Transfer Path</span>

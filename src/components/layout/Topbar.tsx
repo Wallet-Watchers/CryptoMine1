@@ -63,12 +63,16 @@ export const Topbar: React.FC = () => {
         return ['Cases', selectedCaseId, activeCaseTab.charAt(0).toUpperCase() + activeCaseTab.slice(1).replace('-', ' ')];
       case 'create-case':
         return ['Cases', 'New Investigation'];
+      case 'complaint-analysis':
+        return ['Cases', 'Analysis Queue', 'Complaint Analysis'];
       case 'network':
         return ['Network Intelligence'];
       case 'monitoring':
         return ['Surveillance Monitoring'];
       case 'reports':
         return ['Reports'];
+      case 'admin':
+        return ['Intelligence Database', 'Admin'];
       case 'settings':
         return ['Settings'];
       default:

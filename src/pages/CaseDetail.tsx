@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   GitFork, 
   Layers, 
@@ -24,7 +24,9 @@ import { RiskBadge } from '../components/common/RiskBadge';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { EvidenceBadge } from '../components/common/EvidenceBadge';
 import { MonoText } from '../components/common/MonoText';
+import { RiskAnalysisModal } from '../components/common/RiskAnalysisModal';
 import { TransactionGraph } from '../components/graph/TransactionGraph';
+import { VASPAttribution } from '../components/case/VASPAttribution';
 import { CaseTab } from '../types';
 import { CURRENT_INVESTIGATOR } from '../data/mockData';
 
@@ -41,6 +43,7 @@ export const CaseDetail: React.FC = () => {
     caseWallets,
     showToast
   } = useInvestigation();
+  const [riskModalOpen, setRiskModalOpen] = useState(false);
   const linkedCases = selectedCampaign
     ? cases.filter(caseItem => caseItem.id !== selectedCase.id && selectedCampaign.connectedCases.includes(caseItem.id))
     : [];
@@ -86,7 +89,13 @@ export const CaseDetail: React.FC = () => {
                 {selectedCase.id}
               </span>
               <StatusBadge status={selectedCase.status} />
-              <RiskBadge level={selectedCase.riskLevel} score={selectedCase.riskScore} />
+              <button
+                onClick={() => selectedCase.riskScore > 0 && setRiskModalOpen(true)}
+                title="View risk score breakdown"
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+              >
+                <RiskBadge level={selectedCase.riskLevel} score={selectedCase.riskScore} />
+              </button>
               <span className="text-xs text-slate-400 font-mono">· {selectedCase.blockchain} · {selectedCase.asset}</span>
             </div>
             <h1 className="text-xl font-bold tracking-tight text-slate-900">
@@ -195,16 +204,19 @@ export const CaseDetail: React.FC = () => {
               <div className="font-mono text-xl font-bold text-purple-900 mt-1">
                 {selectedCase.connectedCasesCount} cases
               </div>
-              <span className="text-[11px] text-purple-700 group-hover:underline">
-                {selectedCampaign ? `${selectedCampaign.id} · ${selectedCampaign.confidence}% match` : 'No campaign match recorded'}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-purple-700 group-hover:underline">
+                  {selectedCampaign ? `${selectedCampaign.id} · ${selectedCampaign.confidence}% match` : 'No campaign match recorded'}
+                </span>
+                {selectedCampaign && <EvidenceBadge classification="DERIVED" size="sm" />}
+              </div>
             </div>
           </div>
 
           {/* Data Flow Relationship Breakdown */}
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-3">
             <span className="micro-label text-slate-500">FUND DISPERSAL RECONCILIATION</span>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
               <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-lg space-y-0.5">
                 <span className="text-slate-500 font-mono text-[10px]">1. Received by Suspect</span>
                 <div className="font-mono text-base font-bold text-slate-900">{selectedCase.reportedAmount}</div>
@@ -224,6 +236,15 @@ export const CaseDetail: React.FC = () => {
                 <span className="text-slate-500 font-mono text-[10px]">4. Retained / Unlinked Splits</span>
                 <div className="font-mono text-base font-bold text-slate-600">{selectedCase.retainedAmount}</div>
                 <span className="text-[11px] text-slate-500">Gas & unindexed dust splits</span>
+              </div>
+              <div className="p-3 bg-amber-50/60 border border-amber-200 rounded-lg space-y-0.5">
+                <span className="text-amber-800 font-mono text-[10px] font-bold">5. Unconfirmed Balance</span>
+                <div className="font-mono text-base font-bold text-amber-700">
+                  {Number(selectedCase.sentAmount.replace(/[^0-9.]/g, '')) > 0 && Number(selectedCase.tracedAmount.replace(/[^0-9.]/g, '')) > 0
+                    ? `${(Number(selectedCase.sentAmount.replace(/[^0-9.]/g, '')) - Number(selectedCase.tracedAmount.replace(/[^0-9.]/g, ''))).toLocaleString()} USDT`
+                    : 'Pending analysis'}
+                </div>
+                <span className="text-[11px] text-amber-800">Unconfirmed / awaiting on-chain confirmation</span>
               </div>
             </div>
           </div>
@@ -496,16 +517,18 @@ export const CaseDetail: React.FC = () => {
               <div className="p-3.5 bg-purple-50/60 border border-purple-200 rounded-lg space-y-1">
                 <span className="text-purple-700 text-[10px] font-mono uppercase font-bold">4. Syndicate Link</span>
                 <div className="font-bold text-purple-950">Campaign Connection</div>
-                <div className="pt-1">
+                <div className="pt-1 flex items-center gap-1.5">
                   <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 font-mono">91% Conf</span>
+                  <EvidenceBadge classification="DERIVED" size="sm" />
                 </div>
               </div>
 
               <div className="p-3.5 bg-emerald-50/60 border border-emerald-200 rounded-lg space-y-1">
                 <span className="text-emerald-700 text-[10px] font-mono uppercase font-bold">5. Destination</span>
                 <div className="font-bold text-emerald-950">Possible VASP: Binance</div>
-                <div className="pt-1">
+                <div className="pt-1 flex items-center gap-1.5">
                   <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-mono">89% Prob</span>
+                  <EvidenceBadge classification="POSSIBLE" size="sm" />
                 </div>
               </div>
             </div>
@@ -544,6 +567,7 @@ export const CaseDetail: React.FC = () => {
               <div className="flex items-center gap-2 bg-purple-50 border border-purple-200 px-3.5 py-1.5 rounded-lg">
                 <span className="font-mono text-xl font-bold text-purple-900">{selectedCampaign ? `${selectedCampaign.confidence}%` : '—'}</span>
                 <span className="text-xs font-mono text-purple-700 font-medium">Confidence</span>
+                {selectedCampaign && <EvidenceBadge classification="DERIVED" size="sm" />}
               </div>
             </div>
 
@@ -618,57 +642,10 @@ export const CaseDetail: React.FC = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 4: VASP ATTRIBUTION */}
+      {/* TAB 4: VASP ATTRIBUTION (Dedicated page) */}
       {/* ========================================================================= */}
       {activeCaseTab === 'vasp' && (
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-2xs space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-              <div>
-                <span className="micro-label text-emerald-700 font-bold">DOWNSTREAM DESTINATION ATTRIBUTION</span>
-                <h3 className="text-base font-bold text-slate-900 mt-0.5">
-                  Possible VASP Attribution
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Heuristic identification based on deposit sweep patterns and verified cluster intelligence.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-lg">
-                <span className="font-mono text-xl font-bold text-emerald-900">{selectedVasp ? `${selectedVasp.confidence}%` : '—'}</span>
-                <span className="text-xs font-mono text-emerald-700 font-medium">Confidence</span>
-              </div>
-            </div>
-
-            {/* Candidate Box */}
-            <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-mono uppercase text-slate-500">Identified Candidate Entity</span>
-                  <h4 className="text-lg font-bold text-slate-900 mt-0.5">{selectedVasp ? `${selectedVasp.name} (Cluster ${selectedVasp.clusterId})` : 'No VASP candidate recorded'}</h4>
-                  <span className="text-xs text-slate-600 font-mono">{selectedVasp ? `${selectedVasp.blockchain} · ${selectedVasp.type}` : 'No attribution data available'}</span>
-                </div>
-                <EvidenceBadge classification="POSSIBLE" size="md" />
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <h5 className="font-bold text-slate-900 uppercase tracking-wider text-[10px]">Based on:</h5>
-                <ul className="list-disc list-inside text-slate-700 space-y-1 leading-relaxed">
-                  <li><strong>Destination cluster:</strong> {selectedVasp?.evidence || 'No destination-cluster evidence has been recorded.'}</li>
-                  <li><strong>Observed transaction patterns:</strong> {selectedVasp?.depositPatterns || 'No deposit-pattern evidence has been recorded.'}</li>
-                  <li><strong>Status:</strong> {selectedVasp?.status || 'No VASP attribution is associated with this case.'}</li>
-                </ul>
-              </div>
-
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 space-y-0.5">
-                <span className="font-bold">Status: {selectedVasp?.status || 'No attribution recorded'}</span>
-                <p className="text-[11px] leading-snug">
-                  Attribution is probabilistic. An official Law Enforcement Information Request (LEIR) must be submitted to obtain confirmed account holder identity and KYC records.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <VASPAttribution />
       )}
 
       {/* ========================================================================= */}
@@ -807,8 +784,9 @@ export const CaseDetail: React.FC = () => {
               <h3 className="font-bold text-slate-900 uppercase tracking-wider text-xs border-b border-slate-200 pb-1">
                 3. Network & Campaign Findings
               </h3>
-              <p className="text-slate-700 leading-relaxed">
+              <p className="text-slate-700 leading-relaxed flex items-center gap-2">
                 {selectedCampaign ? <>This case is linked to <strong className="text-slate-900">{selectedCampaign.name} ({selectedCampaign.id} · {selectedCampaign.confidence}% confidence)</strong>, with {linkedCases.length} other recorded case{linkedCases.length === 1 ? '' : 's'} sharing the campaign infrastructure.</> : 'No campaign correlation has been recorded for this case.'}
+                {selectedCampaign && <EvidenceBadge classification="DERIVED" size="sm" />}
               </p>
             </div>
 
@@ -817,8 +795,9 @@ export const CaseDetail: React.FC = () => {
               <h3 className="font-bold text-slate-900 uppercase tracking-wider text-xs border-b border-slate-200 pb-1">
                 4. Possible VASP Attribution
               </h3>
-              <p className="text-slate-700 leading-relaxed">
+              <p className="text-slate-700 leading-relaxed flex items-center gap-2">
                 {selectedVasp ? <>Destination analysis identifies <strong className="text-slate-900">{selectedVasp.name} (Cluster {selectedVasp.clusterId} · {selectedVasp.confidence}% confidence)</strong>. Attribution is probabilistic and requires formal law-enforcement information request (LEIR) for verification.</> : 'No VASP attribution has been recorded for this case.'}
+                {selectedVasp && <EvidenceBadge classification="POSSIBLE" size="sm" />}
               </p>
             </div>
 
@@ -846,6 +825,17 @@ export const CaseDetail: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Risk Score Drill-Down Modal */}
+      <RiskAnalysisModal
+        isOpen={riskModalOpen}
+        onClose={() => setRiskModalOpen(false)}
+        score={selectedCase.riskScore}
+        level={selectedCase.riskLevel}
+        entityLabel={`Case ${selectedCase.id} · ${selectedCase.title}`}
+        contributors={selectedCase.riskContributors}
+        summary={`Composite risk computed from ${selectedCase.riskContributors.length || 5} behavioural contributors observed across ${selectedCase.transactionsCount} analyzed transfers.`}
+      />
     </div>
   );
 };

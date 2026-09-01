@@ -122,6 +122,7 @@ export interface CaseItem {
   retainedAmount: string;
   primaryWallet: string;
   status: CaseStatus;
+  reportStatus?: ReportStatus;
   leadInvestigator: string;
   unit: string;
   createdAt: string;
@@ -221,7 +222,41 @@ export type ActivePage =
   | 'cases'
   | 'case-detail'
   | 'create-case'
+  | 'complaint-analysis'
   | 'network'
   | 'monitoring'
   | 'reports'
-  | 'settings';
+  | 'settings'
+  | 'admin';
+
+export type UserRole = 'Analyst' | 'Investigator' | 'Supervisor';
+
+export type ReportStatus = 'Draft' | 'Finalized' | 'Submitted';
+
+export interface VASPDatabaseEntry {
+  id: string;
+  name: string;
+  type: string;
+  blockchain: BlockchainType;
+  knownWalletCluster: string;
+  evidenceSource: string;
+  lastVerified: string;
+  confidence: number;
+}
+
+export interface KnownRiskAddress {
+  id: string;
+  wallet: string;
+  shortAddress: string;
+  riskCategory: string;
+  source: string;
+  dateAdded: string;
+  reason: string;
+}
+
+export interface ExtractedField {
+  key: string;
+  label: string;
+  value: string;
+  verified: boolean;
+}

@@ -97,11 +97,11 @@ export const ExplainabilityModal: React.FC<ExplainabilityModalProps> = ({
 
             <div className="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-200">
               {(data?.contributors || [
-                { factor: "Rapid fund movement", points: 25, category: "Velocity", evidence: "Funds moved onward within minutes of receipt.", severity: "HIGH" },
-                { factor: "Intermediary wallets", points: 20, category: "Layering", evidence: "Three intermediary nodes connect to primary path.", severity: "HIGH" },
-                { factor: "High transaction frequency", points: 18, category: "Volume", evidence: "42 transactions observed during active analysis window.", severity: "MEDIUM" },
-                { factor: "Fund splitting", points: 14, category: "Dispersal", evidence: "Incoming funds divided across multiple downstream addresses.", severity: "MEDIUM" },
-                { factor: "New counterparties", points: 10, category: "Network", evidence: "18 counterparties interacted with 0 prior history.", severity: "MEDIUM" }
+                { factor: "Rapid fund movement", points: 20, category: "Velocity", evidence: "Outbound tranche moved onward within minutes of receipt.", severity: "HIGH" },
+                { factor: "Multiple wallet splitting", points: 18, category: "Layering", evidence: "Incoming funds fragmented across several downstream addresses.", severity: "HIGH" },
+                { factor: "High-risk connections", points: 25, category: "Network", evidence: "Direct interaction with known fraud-flagged counterparty cluster.", severity: "HIGH" },
+                { factor: "Repeated consolidation", points: 14, category: "Dispersal", evidence: "Multiple tranches re-merged into a single collector wallet.", severity: "MEDIUM" },
+                { factor: "Known suspicious cluster", points: 10, category: "Correlation", evidence: "Address overlaps a flagged intelligence-database cluster.", severity: "MEDIUM" }
               ]).map((c, i) => (
                 <div key={i} className="p-3.5 bg-white hover:bg-slate-50/80 transition-colors flex items-center justify-between gap-4">
                   <div className="space-y-1">

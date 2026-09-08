@@ -712,7 +712,7 @@ export const CaseDetail: React.FC = () => {
       {activeCaseTab === 'report' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between no-print">
-            <span className="text-xs text-slate-500">Formal Evidence Package ready for judicial submission or law-enforcement export.</span>
+            <span className="text-xs text-slate-500">{selectedCase.tracedAmount === 'Pending analysis' ? 'On-chain analysis is pending. This dossier will be populated once fund tracing is complete.' : 'Formal Evidence Package ready for judicial submission or law-enforcement export.'}</span>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleExportCSV}
@@ -774,9 +774,15 @@ export const CaseDetail: React.FC = () => {
               <h3 className="font-bold text-slate-900 uppercase tracking-wider text-xs border-b border-slate-200 pb-1">
                 2. Suspect Wallet & Fund Flow
               </h3>
-              <p className="text-slate-700 leading-relaxed">
-                Suspect wallet received the reported funds and moved <strong>{selectedCase.sentAmount}</strong> across {selectedCase.intermediaryCount} identified intermediary {selectedCase.intermediaryCount === 1 ? 'node' : 'nodes'}. <strong>{selectedCase.tracedAmount}</strong> has been traced in this case.
-              </p>
+              {selectedCase.transactionsCount === 0 && selectedCase.tracedAmount === 'Pending analysis' ? (
+                <p className="text-slate-500 leading-relaxed italic">
+                  On-chain fund flow analysis has not yet been performed for this case. Suspect wallet <code className="font-mono text-slate-600">{selectedCase.primaryWallet}</code> has been recorded; no transfers or intermediary nodes have been identified.
+                </p>
+              ) : (
+                <p className="text-slate-700 leading-relaxed">
+                  Suspect wallet received the reported funds and moved <strong>{selectedCase.sentAmount}</strong> across {selectedCase.intermediaryCount} identified intermediary {selectedCase.intermediaryCount === 1 ? 'node' : 'nodes'}. <strong>{selectedCase.tracedAmount}</strong> has been traced in this case.
+                </p>
+              )}
             </div>
 
             {/* Section 3: Network / Campaign Findings */}
@@ -806,12 +812,20 @@ export const CaseDetail: React.FC = () => {
               <h3 className="font-bold text-slate-900 uppercase tracking-wider text-xs border-b border-slate-200 pb-1">
                 5. Recommended Investigative Actions
               </h3>
-              <ol className="list-decimal list-inside text-slate-700 space-y-1 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <li>Preserve on-chain blockchain transaction evidence across all {selectedCase.transactionsCount} identified transfers.</li>
-                <li>Maintain surveillance on the {monitoredCaseWallets.length} wallet{monitoredCaseWallets.length === 1 ? '' : 's'} in this case scope.</li>
-                {linkedCases.length > 0 && <li>Coordinate with task force investigators on the {linkedCases.length} connected case{linkedCases.length === 1 ? '' : 's'}.</li>}
-                {selectedVasp && <li>Submit an official LEIR to {selectedVasp.name} Compliance regarding the candidate cluster.</li>}
-              </ol>
+              {selectedCase.transactionsCount === 0 && selectedCase.tracedAmount === 'Pending analysis' ? (
+                <ol className="list-decimal list-inside text-slate-700 space-y-1 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-200">
+                  <li>Initiate on-chain trace of suspect wallet <code className="font-mono">{selectedCase.primaryWallet}</code> to identify fund movement and intermediary nodes.</li>
+                  <li>Monitor suspect wallet for outgoing transfers and downstream wallet activity.</li>
+                  <li>Once transfers are identified, preserve blockchain transaction evidence across all discovered paths.</li>
+                </ol>
+              ) : (
+                <ol className="list-decimal list-inside text-slate-700 space-y-1 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-200">
+                  <li>Preserve on-chain blockchain transaction evidence across all {selectedCase.transactionsCount} identified transfers.</li>
+                  <li>Maintain surveillance on the {monitoredCaseWallets.length} wallet{monitoredCaseWallets.length === 1 ? '' : 's'} in this case scope.</li>
+                  {linkedCases.length > 0 && <li>Coordinate with task force investigators on the {linkedCases.length} connected case{linkedCases.length === 1 ? '' : 's'}.</li>}
+                  {selectedVasp && <li>Submit an official LEIR to {selectedVasp.name} Compliance regarding the candidate cluster.</li>}
+                </ol>
+              )}
             </div>
 
             {/* Footer Sign-off */}
@@ -820,7 +834,7 @@ export const CaseDetail: React.FC = () => {
                 <UserCheck className="w-4 h-4 text-slate-700" />
                 <span>Investigator: <strong>{CURRENT_INVESTIGATOR.name}</strong> ({CURRENT_INVESTIGATOR.unit})</span>
               </div>
-              <div>Status: <strong>EVIDENCE REPORT GENERATED</strong></div>
+              <div>Status: <strong>{selectedCase.tracedAmount === 'Pending analysis' ? 'PENDING ON-CHAIN ANALYSIS' : 'EVIDENCE REPORT GENERATED'}</strong></div>
             </div>
           </div>
         </div>

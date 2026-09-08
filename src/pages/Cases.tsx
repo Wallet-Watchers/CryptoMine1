@@ -248,7 +248,9 @@ export const Cases: React.FC = () => {
                 </td>
 
                 <td className="py-3.5 px-4 font-mono font-semibold text-orange-700">
-                  {c.tracedAmount}
+                  {c.tracedAmount === 'Pending analysis'
+                    ? <span className="text-amber-600">Pending analysis</span>
+                    : c.tracedAmount}
                 </td>
 
                 <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>

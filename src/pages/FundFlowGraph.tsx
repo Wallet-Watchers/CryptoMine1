@@ -23,6 +23,7 @@ export const FundFlowGraph: React.FC = () => {
   const [activeCaseId, setActiveCaseId] = useState(selectedCase.id);
 
   const activeCase = cases.find(c => c.id === activeCaseId) ?? selectedCase;
+  const isPending = (c: typeof cases[0]) => c.tracedAmount === 'Pending analysis';
   const sharedCount = cases.reduce((acc, c) => (acc.has(c.primaryWallet) ? acc : acc.add(c.primaryWallet)), new Set()).size;
   const walletUsageEntries: { wallet: string; count: number; cases: string[] }[] = [];
   cases.forEach(c => {
@@ -40,7 +41,7 @@ export const FundFlowGraph: React.FC = () => {
     }
   }
   sharedWalletIds.push('TE5r9024lkj18Nz');
-  sharedWalletUsages.push({ wallet: 'TE5r9024lkj18Nz', count: 3, cases: ['CM-0017', 'CM-0014', 'CM-0009'] });
+  sharedWalletUsages.push({ wallet: 'TE5r9024lkj18Nz', count: 3, cases: ['CM-2026-0017', 'CM-2026-0014', 'CM-2026-0009'] });
 
   return (
     <div className="space-y-6 max-w-6xl">
@@ -155,14 +156,18 @@ export const FundFlowGraph: React.FC = () => {
         <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-1 shadow-2xs">
           <span className="font-bold text-slate-900">1. Initial Inflow & Rapid Hop</span>
           <p className="text-slate-600 leading-relaxed text-[11px]">
-            Reported loss of {activeCase.reportedAmount} entered suspect wallet {activeCase.primaryWallet.slice(0, 6)}... The case contains {activeCase.transactionsCount} analyzed transfers.
+            {isPending(activeCase)
+              ? `Reported loss of ${activeCase.reportedAmount} entered suspect wallet ${activeCase.primaryWallet.slice(0, 6)}... On-chain tracing is pending; no transfers have been analyzed yet.`
+              : `Reported loss of ${activeCase.reportedAmount} entered suspect wallet ${activeCase.primaryWallet.slice(0, 6)}... The case contains ${activeCase.transactionsCount} analyzed transfers.`}
           </p>
         </div>
 
         <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-1 shadow-2xs">
           <span className="font-bold text-slate-900">2. Layering Transit Chain</span>
           <p className="text-slate-600 leading-relaxed text-[11px]">
-            {activeCase.intermediaryCount} intermediary {activeCase.intermediaryCount === 1 ? 'node was' : 'nodes were'} identified in the recorded fund path for this case.
+            {isPending(activeCase)
+              ? 'No intermediary transit nodes have been identified yet; fund-path layering is pending on-chain analysis.'
+              : `${activeCase.intermediaryCount} intermediary ${activeCase.intermediaryCount === 1 ? 'node was' : 'nodes were'} identified in the recorded fund path for this case.`}
           </p>
         </div>
 

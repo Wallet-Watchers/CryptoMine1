@@ -19,6 +19,7 @@ import { MonoText } from '../components/common/MonoText';
 export const Overview: React.FC = () => {
   const { cases, selectedCase, caseAlerts, navigateTo, currentRole } = useInvestigation();
   const leadCase = selectedCase;
+  const isPending = (c: typeof cases[0]) => c.tracedAmount === 'Pending analysis';
   const activeCasesCount = cases.filter(caseItem => caseItem.status === 'Under Investigation' || caseItem.status === 'Monitoring').length;
   const highRiskCasesCount = cases.filter(caseItem => caseItem.riskLevel === 'HIGH').length;
   const campaignCasesCount = cases.filter(caseItem => Boolean(caseItem.campaignId)).length;
@@ -64,7 +65,9 @@ export const Overview: React.FC = () => {
         </div>
         <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-2xs">
           <span className="micro-label text-slate-500">FUNDS TRACED</span>
-          <p className="font-mono text-lg font-bold text-orange-700 mt-1">{leadCase.tracedAmount}</p>
+          <p className="font-mono text-lg font-bold text-orange-700 mt-1">
+            {isPending(leadCase) ? '—' : leadCase.tracedAmount}
+          </p>
         </div>
       </div>
 
@@ -120,21 +123,21 @@ export const Overview: React.FC = () => {
           <div className="bg-slate-50 border border-slate-200/80 p-3 rounded-lg">
             <span className="text-[10px] uppercase font-mono text-slate-500">Traced Funds</span>
             <div className="font-mono text-base font-bold text-orange-700 mt-0.5">
-              {leadCase.tracedAmount}
+              {isPending(leadCase) ? <span className="text-slate-400 text-xs font-semibold">Pending analysis</span> : leadCase.tracedAmount}
             </div>
           </div>
 
           <div className="bg-slate-50 border border-slate-200/80 p-3 rounded-lg">
             <span className="text-[10px] uppercase font-mono text-slate-500">Transactions Analyzed</span>
             <div className="font-mono text-base font-bold text-slate-900 mt-0.5">
-              {leadCase.transactionsCount} transfers
+              {isPending(leadCase) ? <span className="text-slate-400 text-xs font-semibold">Pending analysis</span> : `${leadCase.transactionsCount} transfers`}
             </div>
           </div>
 
           <div className="bg-slate-50 border border-slate-200/80 p-3 rounded-lg">
             <span className="text-[10px] uppercase font-mono text-slate-500">Intermediaries</span>
             <div className="font-mono text-base font-bold text-slate-900 mt-0.5">
-              {leadCase.intermediaryCount} transit nodes
+              {isPending(leadCase) ? <span className="text-slate-400 text-xs font-semibold">Pending analysis</span> : `${leadCase.intermediaryCount} transit nodes`}
             </div>
           </div>
         </div>

@@ -44,6 +44,7 @@ export const CaseDetail: React.FC = () => {
     showToast
   } = useInvestigation();
   const [riskModalOpen, setRiskModalOpen] = useState(false);
+  const isPending = selectedCase.tracedAmount === 'Pending analysis';
   const linkedCases = selectedCampaign
     ? cases.filter(caseItem => caseItem.id !== selectedCase.id && selectedCampaign.connectedCases.includes(caseItem.id))
     : [];
@@ -172,7 +173,7 @@ export const CaseDetail: React.FC = () => {
             <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-2xs">
               <span className="micro-label text-slate-500">TRACED FUNDS</span>
               <div className="font-mono text-xl font-bold text-orange-700 mt-1">
-                {selectedCase.tracedAmount}
+                {isPending ? <span className="text-amber-600">Pending analysis</span> : selectedCase.tracedAmount}
               </div>
               <span className="text-[11px] text-slate-500">Case evidence path</span>
             </div>
@@ -180,7 +181,7 @@ export const CaseDetail: React.FC = () => {
             <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-2xs">
               <span className="micro-label text-slate-500">INTERMEDIARIES</span>
               <div className="font-mono text-xl font-bold text-slate-900 mt-1">
-                {selectedCase.intermediaryCount} wallets
+                {isPending ? <span className="text-amber-600">Pending analysis</span> : `${selectedCase.intermediaryCount} wallets`}
               </div>
               <span className="text-[11px] text-slate-500">Layered hops</span>
             </div>
@@ -188,7 +189,7 @@ export const CaseDetail: React.FC = () => {
             <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-2xs">
               <span className="micro-label text-slate-500">TRANSACTIONS</span>
               <div className="font-mono text-xl font-bold text-slate-900 mt-1">
-                {selectedCase.transactionsCount} transfers
+                {isPending ? <span className="text-amber-600">Pending analysis</span> : `${selectedCase.transactionsCount} transfers`}
               </div>
               <span className="text-[11px] text-slate-500">Analyzed ledger</span>
             </div>
@@ -216,6 +217,14 @@ export const CaseDetail: React.FC = () => {
           {/* Data Flow Relationship Breakdown */}
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-3">
             <span className="micro-label text-slate-500">FUND DISPERSAL RECONCILIATION</span>
+            {isPending ? (
+              <div className="p-4 bg-amber-50/60 border border-amber-200 rounded-lg text-xs text-slate-700 space-y-1">
+                <p className="font-bold text-amber-900">On-chain analysis pending</p>
+                <p className="leading-relaxed">
+                  {selectedCase.reportedAmount} was reported sent to suspect wallet <code className="font-mono">{selectedCase.primaryWallet}</code>. No downstream dispersal, intermediary hops, or traced amounts have been confirmed yet.
+                </p>
+              </div>
+            ) : (
             <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
               <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-lg space-y-0.5">
                 <span className="text-slate-500 font-mono text-[10px]">1. Received by Suspect</span>
@@ -247,6 +256,7 @@ export const CaseDetail: React.FC = () => {
                 <span className="text-[11px] text-amber-800">Unconfirmed / awaiting on-chain confirmation</span>
               </div>
             </div>
+            )}
           </div>
 
           {/* Suspect Wallet Analysis Card & Investigation Timeline Grid */}
@@ -294,6 +304,15 @@ export const CaseDetail: React.FC = () => {
                 </div>
 
                 <div className="space-y-2.5 text-xs">
+                  {isPending ? (
+                    <div className="p-3 bg-amber-50/60 border border-amber-200 rounded-lg">
+                      <span className="font-bold text-amber-900">Awaiting on-chain analysis</span>
+                      <p className="text-slate-600 text-[11px] leading-snug pt-1">
+                        The suspect wallet has been recorded. On-chain fund movement, intermediary layering, and transaction activity are pending trace analysis.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
                     <span className="font-bold text-slate-900">Rapid fund movement</span>
                     <p className="text-slate-600 text-[11px] leading-snug">
@@ -314,6 +333,8 @@ export const CaseDetail: React.FC = () => {
                       {selectedCase.transactionsCount} transactions observed during the active analysis window.
                     </p>
                   </div>
+                    </>
+                  )}
                 </div>
 
                 <button
@@ -848,7 +869,9 @@ export const CaseDetail: React.FC = () => {
         level={selectedCase.riskLevel}
         entityLabel={`Case ${selectedCase.id} · ${selectedCase.title}`}
         contributors={selectedCase.riskContributors}
-        summary={`Composite risk computed from ${selectedCase.riskContributors.length || 5} behavioural contributors observed across ${selectedCase.transactionsCount} analyzed transfers.`}
+        summary={isPending
+          ? `Composite risk is pending on-chain analysis. No transfers have been analyzed yet; a risk score will be computed once tracing is complete.`
+          : `Composite risk computed from ${selectedCase.riskContributors.length || 5} behavioural contributors observed across ${selectedCase.transactionsCount} analyzed transfers.`}
       />
     </div>
   );

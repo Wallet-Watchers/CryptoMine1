@@ -110,8 +110,8 @@ export const CreateCase: React.FC = () => {
     showToast('Investigation Started', fileName ? 'Complaint forwarded for AI extraction & verification.' : 'New case opened for investigation.', 'success');
   };
 
-  if (currentRole === 'Analyst') {
-    showToast('Access Denied', 'Analysts cannot create new investigations.', 'warning');
+  if (currentRole === 'User') {
+    showToast('Access Denied', 'Users cannot create new investigations.', 'warning');
     navigateTo('cases');
     return null;
   }

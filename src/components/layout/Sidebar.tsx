@@ -25,8 +25,8 @@ interface NavItem {
 export const Sidebar: React.FC = () => {
   const { activePage, navigateTo, alerts, currentRole, currentInvestigator } = useInvestigation();
   const unreadAlertsCount = alerts.filter(a => !a.isRead).length;
-  const isAdmin = currentRole === 'Supervisor';
-  const isAnalyst = currentRole === 'Analyst';
+  const isAdmin = currentRole === 'Admin';
+  const isAnalyst = currentRole === 'User';
 
   const navItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },

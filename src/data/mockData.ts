@@ -23,7 +23,7 @@ export const CURRENT_INVESTIGATOR = {
 
 export const ROLE_DEFINITIONS: { role: UserRole; description: string; permissions: string[] }[] = [
   {
-    role: 'Analyst',
+    role: 'User',
     description: 'Read-Only — review cases, graphs, and reports without making changes.',
     permissions: ['View cases', 'View fund flow & network', 'View reports', 'Read-only evidence']
   },
@@ -33,7 +33,7 @@ export const ROLE_DEFINITIONS: { role: UserRole; description: string; permission
     permissions: ['Create cases', 'Edit evidence', 'Run tracing', 'Manage monitoring', 'Draft reports']
   },
   {
-    role: 'Supervisor',
+    role: 'Admin',
     description: 'Admin — reassign cases across investigators, review and finalize reports, access intelligence database.',
     permissions: ['All Investigator permissions', 'Reassign cases', 'Approve / finalize reports', 'Admin intelligence database']
   }

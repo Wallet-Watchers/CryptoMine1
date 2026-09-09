@@ -153,9 +153,9 @@ export const Login: React.FC = () => {
                     onChange={(e) => setRole(e.target.value as UserRole)}
                     className="w-full px-3 py-2.5 bg-slate-900/80 border border-slate-800 focus:border-orange-500 rounded-lg text-sm text-white font-mono outline-none transition-colors"
                   >
-                    <option value="Analyst">Analyst</option>
                     <option value="Investigator">Investigator</option>
-                    <option value="Supervisor">Supervisor</option>
+                    <option value="Admin">Admin</option>
+                    <option value="User">User</option>
                   </select>
                 </div>
 

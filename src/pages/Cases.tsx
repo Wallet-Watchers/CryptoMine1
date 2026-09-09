@@ -117,7 +117,7 @@ export const Cases: React.FC = () => {
           </p>
         </div>
 
-        {currentRole !== 'Analyst' && (
+        {currentRole !== 'User' && (
           <button
             onClick={() => navigateTo('create-case')}
             className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-bold flex items-center gap-2 shadow-xs transition-all cursor-pointer self-start sm:self-auto active:scale-[0.99]"
@@ -286,7 +286,7 @@ export const Cases: React.FC = () => {
                       </button>
                       {menuOpenFor === c.id && (
                         <div className="absolute right-0 top-full mt-1 w-56 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50 text-left animate-in fade-in duration-100">
-                          {currentRole === 'Supervisor' && (
+                          {currentRole === 'Admin' && (
                             <button
                               onClick={() => runRowAction('assign', c)}
                               className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"

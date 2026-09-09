@@ -39,7 +39,7 @@ export const Overview: React.FC = () => {
           </p>
         </div>
 
-        {currentRole !== 'Analyst' && (
+        {currentRole !== 'User' && (
           <button
             onClick={() => navigateTo('create-case')}
             className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-bold flex items-center gap-2 shadow-xs transition-all cursor-pointer self-start sm:self-auto active:scale-[0.99]"

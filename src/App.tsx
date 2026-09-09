@@ -23,7 +23,7 @@ const AppContent: React.FC = () => {
     return <Login />;
   }
 
-  const isAdmin = currentRole === 'Supervisor';
+  const isAdmin = currentRole === 'Admin';
 
   const renderActivePage = () => {
     switch (activePage) {

@@ -18,7 +18,7 @@ export const AdminDatabase: React.FC = () => {
   const [vaspSearch, setVaspSearch] = useState('');
   const [riskSearch, setRiskSearch] = useState('');
 
-  if (currentRole !== 'Supervisor') {
+  if (currentRole !== 'Admin') {
     return (
       <div className="p-10 bg-white border border-slate-200 rounded-xl shadow-2xs text-center space-y-2">
         <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full mx-auto flex items-center justify-center">
@@ -26,7 +26,7 @@ export const AdminDatabase: React.FC = () => {
         </div>
         <h3 className="text-sm font-bold text-slate-900">Access Restricted</h3>
         <p className="text-xs text-slate-500">
-          The Intelligence Database is available to Supervisors (Admin) only.
+          The Intelligence Database is available to Admins only.
         </p>
       </div>
     );
@@ -204,7 +204,7 @@ export const AdminDatabase: React.FC = () => {
       <div className="flex items-center justify-between px-4 py-3 bg-slate-900 rounded-xl text-slate-300 text-xs">
         <div className="flex items-center gap-2">
           <Database className="w-4 h-4 text-orange-400" />
-          <span className="font-mono">Reference access logged · Supervisor session required</span>
+          <span className="font-mono">Reference access logged · Admin session required</span>
         </div>
         <div className="flex gap-4">
           <span className="text-slate-500">Level 4 · Privileged intelligence</span>

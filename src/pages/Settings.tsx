@@ -13,9 +13,9 @@ import { ROLE_DEFINITIONS } from '../data/mockData';
 import { UserRole } from '../types';
 
 const ROLE_ICONS: Record<UserRole, React.ReactNode> = {
-  Analyst: <Lock className="w-3.5 h-3.5" />,
+  User: <User className="w-3.5 h-3.5" />,
   Investigator: <PenLine className="w-3.5 h-3.5" />,
-  Supervisor: <ShieldCheck className="w-3.5 h-3.5" />
+  Admin: <ShieldCheck className="w-3.5 h-3.5" />
 };
 
 export const Settings: React.FC = () => {
@@ -78,8 +78,8 @@ export const Settings: React.FC = () => {
             <div className="flex items-center gap-1.5">
               <span className="font-semibold text-slate-900">{currentRole}</span>
               {currentRole === 'Investigator' && <span className="text-[10px] text-slate-500">/ Read-Write</span>}
-              {currentRole === 'Analyst' && <span className="text-[10px] text-slate-500">/ Read-Only</span>}
-              {currentRole === 'Supervisor' && <span className="text-[10px] text-slate-500">/ Admin</span>}
+              {currentRole === 'User' && <span className="text-[10px] text-slate-500">/ Read-Only</span>}
+              {currentRole === 'Admin' && <span className="text-[10px] text-slate-500">/ Admin</span>}
             </div>
           </div>
 
@@ -146,7 +146,7 @@ export const Settings: React.FC = () => {
 
         <p className="text-[11px] text-slate-500 leading-relaxed flex items-start gap-1.5">
           <Lock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-slate-400" />
-          Permission changes require a Supervisor to approve. Analyst sessions cannot create cases, run tracing, or modify evidence.
+          Permission changes require an Admin to approve. User sessions cannot create cases, run tracing, or modify evidence.
         </p>
       </div>
 

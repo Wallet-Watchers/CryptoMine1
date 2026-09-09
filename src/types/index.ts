@@ -229,7 +229,7 @@ export type ActivePage =
   | 'settings'
   | 'admin';
 
-export type UserRole = 'Analyst' | 'Investigator' | 'Supervisor';
+export type UserRole = 'Investigator' | 'Admin' | 'User';
 
 export type ReportStatus = 'Draft' | 'Finalized' | 'Submitted';
 

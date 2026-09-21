@@ -159,6 +159,19 @@ export interface CampaignItem {
   }[];
 }
 
+export interface CrossPlatformCorrelation {
+  id: string;
+  platform: string;
+  platformHandle: string;
+  channelType: string;
+  evidenceSource: string;
+  relationship: string;
+  linkedCaseIds: string[];
+  connection: string;
+  description: string;
+  classification: EvidenceClassification;
+}
+
 export interface VASPEntity {
   id: string;
   name: string;
@@ -181,6 +194,43 @@ export interface VASPEntity {
     classification: EvidenceClassification;
     description: string;
   }[];
+}
+
+export interface ExchangeAccountTrace {
+  id: string;
+  caseId: string;
+  vaspClusterId: string;
+  isSyntheticDemoData: boolean;
+  onChain: {
+    intermediaryWallet: string;
+    exchangeDepositAddress: string;
+    transactionHash: string;
+    amount: string;
+    asset: string;
+    timestamp: string;
+  };
+  exchangeSide: {
+    exchangeAccountId: string;
+    depositReference: string;
+    depositAmount: string;
+    depositTimestamp: string;
+    remainingBalance: string;
+    evidenceSource: string;
+    internalTransfer: {
+      reference: string;
+      sourceAccountId: string;
+      destinationAccountId: string;
+      amount: string;
+      timestamp: string;
+    };
+    withdrawal: {
+      reference: string;
+      sourceAccountId: string;
+      destinationWallet: string;
+      amount: string;
+      timestamp: string;
+    };
+  };
 }
 
 export interface AlertItem {

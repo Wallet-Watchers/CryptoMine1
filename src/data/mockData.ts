@@ -3,6 +3,8 @@ import {
   WalletEntity, 
   TransactionItem, 
   CampaignItem, 
+  CrossPlatformCorrelation,
+  ExchangeAccountTrace,
   VASPEntity, 
   AlertItem,
   UserRole,
@@ -714,6 +716,21 @@ export const MOCK_CAMPAIGN: CampaignItem = {
   ]
 };
 
+export const MOCK_CROSS_PLATFORM_CORRELATIONS: CrossPlatformCorrelation[] = [
+  {
+    id: 'XPC-001',
+    platform: 'Telegram',
+    platformHandle: '@GoldenAlphaYield',
+    channelType: 'Telegram Group / Channel',
+    evidenceSource: 'Complaint / Contact-vector records',
+    relationship: 'Shared contact vector',
+    linkedCaseIds: ['CM-2026-0017', 'CM-2026-0014'],
+    connection: 'Same Telegram group/channel',
+    description: 'Complaint and contact-vector records associate both investigations with the same Telegram group/channel.',
+    classification: 'DERIVED'
+  }
+];
+
 export const MOCK_VASP: VASPEntity = {
   id: "V-018",
   name: "Binance",
@@ -729,18 +746,18 @@ export const MOCK_VASP: VASPEntity = {
     "TPYm92kLo81vCa7Nx21980... (Deposit Sweeper 03)"
   ],
   candidateAddresses: [
-    "TE5r9024lkj18Nz (Collector Node / Deposit Candidate)"
+    "TD9x7a82mN94LmQ (Binance Deposit Address / Cluster V-018)"
   ],
   depositPatterns: "Batched sweep executed when threshold exceeds 10,000 USDT.",
   relatedCases: ["CM-2026-0017", "CM-2026-0014", "CM-2026-0009"],
-  relatedWallets: ["TE5r9024lkj18Nz", "TC8m1982bcn81Qa"],
+  relatedWallets: ["TD9x7a82mN94LmQ", "TE5r9024lkj18Nz", "TC8m1982bcn81Qa"],
   jurisdiction: "International",
   complianceContactAvailable: true,
   attributionSignals: [
     {
       title: "Destination Cluster Overlap",
       classification: "OBSERVATION",
-      description: "Collector matches known exchange deposit router schema."
+      description: "Candidate exchange deposit address matches known exchange deposit router schema."
     },
     {
       title: "Observed Routing Pattern",
@@ -754,6 +771,45 @@ export const MOCK_VASP: VASPEntity = {
     }
   ]
 };
+
+export const MOCK_EXCHANGE_ACCOUNT_TRACES: ExchangeAccountTrace[] = [
+  {
+    id: 'EAT-001',
+    caseId: 'CM-2026-0017',
+    vaspClusterId: 'V-018',
+    isSyntheticDemoData: true,
+    onChain: {
+      intermediaryWallet: 'TC8m1982bcn81Qa',
+      exchangeDepositAddress: 'TD9x7a82mN94LmQ',
+      transactionHash: '0x5dce728fa61b7491',
+      amount: '43,700 USDT',
+      asset: 'USDT',
+      timestamp: '26 Aug 2026, 14:32'
+    },
+    exchangeSide: {
+      exchangeAccountId: 'EXC-48291',
+      depositReference: 'DEP-774201',
+      depositAmount: '43,700 USDT',
+      depositTimestamp: '26 Aug 2026, 14:36',
+      remainingBalance: '25,200 USDT',
+      evidenceSource: 'Exchange-side investigative record (synthetic prototype data)',
+      internalTransfer: {
+        reference: 'INT-00921',
+        sourceAccountId: 'EXC-48291',
+        destinationAccountId: 'EXC-78142',
+        amount: '18,500 USDT',
+        timestamp: '26 Aug 2026, 15:02'
+      },
+      withdrawal: {
+        reference: 'WDL-11842',
+        sourceAccountId: 'EXC-78142',
+        destinationWallet: 'TB8x7810fm4Xq2',
+        amount: '18,500 USDT',
+        timestamp: '26 Aug 2026, 15:18'
+      }
+    }
+  }
+];
 
 export const MOCK_ALERTS: AlertItem[] = [
   {

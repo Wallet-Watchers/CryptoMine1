@@ -6,6 +6,8 @@ import {
   WalletEntity, 
   TransactionItem, 
   CampaignItem, 
+  CrossPlatformCorrelation,
+  ExchangeAccountTrace,
   VASPEntity, 
   AlertItem,
   UserRole,
@@ -19,6 +21,8 @@ import {
   MOCK_WALLETS, 
   MOCK_TRANSACTIONS, 
   MOCK_CAMPAIGN, 
+  MOCK_CROSS_PLATFORM_CORRELATIONS,
+  MOCK_EXCHANGE_ACCOUNT_TRACES,
   MOCK_VASP, 
   MOCK_ALERTS, 
   MOCK_MONITORED_NODES,
@@ -63,6 +67,8 @@ interface InvestigationContextType {
   wallets: Record<string, WalletEntity>;
   transactions: TransactionItem[];
   campaign: CampaignItem;
+  crossPlatformCorrelations: CrossPlatformCorrelation[];
+  exchangeAccountTraces: ExchangeAccountTrace[];
   vasp: VASPEntity;
   selectedCampaign?: CampaignItem;
   selectedVasp?: VASPEntity;
@@ -132,6 +138,8 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [wallets, setWallets] = useState<Record<string, WalletEntity>>(MOCK_WALLETS);
   const [transactions] = useState<TransactionItem[]>(MOCK_TRANSACTIONS);
   const [campaign] = useState<CampaignItem>(MOCK_CAMPAIGN);
+  const [crossPlatformCorrelations] = useState<CrossPlatformCorrelation[]>(MOCK_CROSS_PLATFORM_CORRELATIONS);
+  const [exchangeAccountTraces] = useState<ExchangeAccountTrace[]>(MOCK_EXCHANGE_ACCOUNT_TRACES);
   const [vasp] = useState<VASPEntity>(MOCK_VASP);
   const [alerts, setAlerts] = useState<AlertItem[]>(MOCK_ALERTS);
   const [monitoredNodes, setMonitoredNodes] = useState(MOCK_MONITORED_NODES);
@@ -274,6 +282,8 @@ currentRole,
         wallets,
         transactions,
         campaign,
+        crossPlatformCorrelations,
+        exchangeAccountTraces,
         vasp,
         selectedCampaign,
         selectedVasp,

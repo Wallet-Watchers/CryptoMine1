@@ -38,6 +38,8 @@ export const CaseDetail: React.FC = () => {
     navigateTo,
     cases,
     selectedCampaign,
+    crossPlatformCorrelations,
+    exchangeAccountTraces,
     selectedVasp,
     caseAlerts,
     caseWallets,
@@ -48,6 +50,15 @@ export const CaseDetail: React.FC = () => {
   const linkedCases = selectedCampaign
     ? cases.filter(caseItem => caseItem.id !== selectedCase.id && selectedCampaign.connectedCases.includes(caseItem.id))
     : [];
+  const crossPlatformCorrelation = crossPlatformCorrelations.find(correlation =>
+    correlation.linkedCaseIds.includes(selectedCase.id)
+  );
+  const crossPlatformCases = crossPlatformCorrelation
+    ? cases.filter(caseItem => crossPlatformCorrelation.linkedCaseIds.includes(caseItem.id))
+    : [];
+  const exchangeAccountTrace = exchangeAccountTraces.find(trace =>
+    trace.caseId === selectedCase.id && trace.vaspClusterId === selectedVasp?.clusterId
+  );
   const monitoredCaseWallets = caseWallets.length > 0 ? caseWallets : [{
     address: selectedCase.primaryWallet,
     shortAddress: `${selectedCase.primaryWallet.slice(0, 6)}...${selectedCase.primaryWallet.slice(-4)}`,
@@ -592,10 +603,132 @@ export const CaseDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Why These Cases Appear Connected */}
+            {/* Cross-Platform Correlation */}
+            <div className="border border-purple-200 rounded-xl overflow-hidden bg-purple-50/30">
+              <div className="px-4 py-3.5 border-b border-purple-100 bg-white/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Network className="w-4 h-4 text-purple-600" />
+                    <div>
+                      <span className="micro-label text-purple-700">Cross-Platform Intelligence</span>
+                      <h4 className="text-sm font-bold text-purple-950 mt-0.5">Same Telegram Contact Vector Across Multiple Cases</h4>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-600 mt-1">
+                    External-platform contact evidence correlated with the corresponding blockchain investigations.
+                  </p>
+                </div>
+                {crossPlatformCorrelation && <EvidenceBadge classification={crossPlatformCorrelation.classification} size="sm" />}
+              </div>
+
+              {crossPlatformCorrelation ? (
+                <div className="p-4 space-y-4">
+                  {/* Evidence provenance */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 border border-slate-200 rounded-lg overflow-hidden bg-white divide-x divide-y lg:divide-y-0 divide-slate-100 text-[11px]">
+                    <div className="p-3 space-y-1">
+                      <span className="micro-label text-slate-500">Evidence Source</span>
+                      <p className="font-medium text-slate-800">{crossPlatformCorrelation.evidenceSource}</p>
+                    </div>
+                    <div className="p-3 space-y-1">
+                      <span className="micro-label text-slate-500">External Platform</span>
+                      <p className="font-medium text-slate-800">{crossPlatformCorrelation.platform}</p>
+                    </div>
+                    <div className="p-3 space-y-1">
+                      <span className="micro-label text-slate-500">Identifier</span>
+                      <p className="font-mono font-bold text-slate-900">{crossPlatformCorrelation.platformHandle}</p>
+                    </div>
+                    <div className="p-3 space-y-1">
+                      <span className="micro-label text-slate-500">Relationship</span>
+                      <p className="font-medium text-slate-800">{crossPlatformCorrelation.relationship}</p>
+                    </div>
+                  </div>
+
+                  {/* External-platform evidence correlated with the case-level blockchain investigations */}
+                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-lg border border-purple-100 bg-purple-50/50 px-3.5 py-3 text-center sm:text-left">
+                    <div>
+                      <span className="micro-label text-purple-700">Cross-Platform Evidence</span>
+                      <p className="font-mono text-xs font-bold text-slate-900 mt-0.5">{crossPlatformCorrelation.platform} · {crossPlatformCorrelation.platformHandle}</p>
+                    </div>
+                    <span className="text-lg leading-none font-mono text-purple-500" aria-hidden="true">↕</span>
+                    <div className="sm:text-right">
+                      <span className="micro-label text-slate-600">On-Chain Investigation</span>
+                      <p className="text-[11px] font-medium text-slate-800 mt-0.5">Wallets and transaction activity associated with each case</p>
+                    </div>
+                  </div>
+
+                  <div className="border-l-2 border-purple-400 pl-3.5 py-0.5">
+                    <span className="micro-label text-purple-700">Why These Cases Are Linked</span>
+                    <p className="text-xs text-slate-700 mt-1">
+                      <strong className="text-purple-950">{crossPlatformCorrelation.connection}</strong> identified as the contact vector in both complaints.
+                    </p>
+                  </div>
+
+                  {/* Relationship view: external platform -> separate cases -> suspect wallets */}
+                  <div className="rounded-lg border border-slate-200 bg-white px-4 py-5">
+                    <div className="mx-auto max-w-md text-center">
+                      <span className="micro-label text-purple-700">External Platform / Contact Evidence</span>
+                      <div className="mt-1.5 inline-flex flex-col items-center rounded-lg border border-purple-200 bg-purple-50 px-5 py-3">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-purple-800">{crossPlatformCorrelation.channelType}</span>
+                        <span className="font-mono text-base font-bold text-purple-950 mt-0.5">{crossPlatformCorrelation.platformHandle}</span>
+                      </div>
+                    </div>
+
+                    <div className="h-6 w-px bg-purple-300 mx-auto" aria-hidden="true" />
+
+                    <div className="relative pt-5">
+                      <div className="hidden md:block absolute top-0 left-1/4 right-1/4 border-t border-purple-300" aria-hidden="true" />
+                      <div className="hidden md:block absolute top-0 left-1/4 h-5 border-l border-purple-300" aria-hidden="true" />
+                      <div className="hidden md:block absolute top-0 right-1/4 h-5 border-l border-purple-300" aria-hidden="true" />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {crossPlatformCases.map((linkedCase) => (
+                          <button
+                            key={linkedCase.id}
+                            onClick={() => navigateTo('case-detail', { caseId: linkedCase.id, tab: 'connections' })}
+                            className={`text-left p-4 border rounded-lg transition-colors cursor-pointer group ${
+                              linkedCase.id === selectedCase.id
+                                ? 'border-purple-300 bg-purple-50/50'
+                                : 'border-slate-200 bg-white hover:border-purple-300 hover:bg-purple-50/30'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="micro-label text-slate-500">Case Investigation</span>
+                              <RiskBadge level={linkedCase.riskLevel} score={linkedCase.riskScore} size="sm" />
+                            </div>
+                            <p className="font-mono text-sm font-bold text-slate-900 group-hover:text-purple-700 mt-2">{linkedCase.id}</p>
+                            <p className="text-xs font-medium text-slate-800 mt-1">{linkedCase.fraudType}</p>
+                            <p className="font-mono text-xs font-bold text-slate-900 mt-0.5">{linkedCase.reportedAmount}</p>
+                            <div className="h-5 w-px bg-slate-300 mx-auto my-2.5" aria-hidden="true" />
+                            <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5">
+                              <span className="micro-label text-slate-500">On-Chain Investigation</span>
+                              <p className="text-[10px] text-slate-500 mt-1">Suspect wallet</p>
+                              <p className="font-mono text-xs font-bold text-slate-900 mt-0.5">{linkedCase.primaryWallet.slice(0, 6)}...{linkedCase.primaryWallet.slice(-4)}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-3 text-[11px] text-slate-700">
+                    <span className="font-bold text-slate-900">Investigation lead:</span>{' '}
+                    Multiple complaints reference the same Telegram group/channel, suggesting a potential shared contact infrastructure.
+                  </div>
+                  <p className="text-[10px] text-slate-500">
+                    Investigative lead only: a shared external platform is a correlation and does not by itself establish a shared criminal actor.
+                  </p>
+                </div>
+              ) : (
+                <div className="px-4 py-4 text-[11px] text-slate-500">
+                  No shared external platform, contact vector, or digital identity has been recorded for this case.
+                </div>
+              )}
+            </div>
+
+            {/* On-Chain Connections */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                Why These Cases Appear Connected:
+              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <span>On-Chain Connections</span>
+                <span className="normal-case font-normal tracking-normal text-[11px] text-slate-500">Shared blockchain evidence across independent complaints.</span>
               </h4>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
@@ -828,10 +961,23 @@ export const CaseDetail: React.FC = () => {
               </p>
             </div>
 
-            {/* Section 5: Recommended Investigative Actions */}
+            {/* Section 5: Exchange Account Trace */}
+            {exchangeAccountTrace && selectedVasp && (
+              <div className="space-y-2 text-xs">
+                <h3 className="font-bold text-slate-900 uppercase tracking-wider text-xs border-b border-slate-200 pb-1">
+                  5. Exchange Account Trace
+                </h3>
+                <p className="text-slate-700 leading-relaxed">
+                  Possible VASP: <strong className="text-slate-900">{selectedVasp.name} ({selectedVasp.clusterId})</strong>. Exchange-side investigative record identifies account <code className="font-mono font-bold">{exchangeAccountTrace.exchangeSide.exchangeAccountId}</code> receiving <strong>{exchangeAccountTrace.exchangeSide.depositAmount}</strong> ({exchangeAccountTrace.exchangeSide.depositReference}), followed by internal transfer <strong>{exchangeAccountTrace.exchangeSide.internalTransfer.amount}</strong> to <code className="font-mono font-bold">{exchangeAccountTrace.exchangeSide.internalTransfer.destinationAccountId}</code> and withdrawal to <code className="font-mono font-bold">{exchangeAccountTrace.exchangeSide.withdrawal.destinationWallet.slice(0, 6)}...{exchangeAccountTrace.exchangeSide.withdrawal.destinationWallet.slice(-4)}</code> ({exchangeAccountTrace.exchangeSide.withdrawal.reference}).
+                </p>
+                <p className="text-[11px] text-slate-500">Evidence: {exchangeAccountTrace.exchangeSide.evidenceSource}. Internal exchange movements are not visible on the public blockchain.</p>
+              </div>
+            )}
+
+            {/* Section 6: Recommended Investigative Actions */}
             <div className="space-y-2 text-xs">
               <h3 className="font-bold text-slate-900 uppercase tracking-wider text-xs border-b border-slate-200 pb-1">
-                5. Recommended Investigative Actions
+                {exchangeAccountTrace ? '6.' : '5.'} Recommended Investigative Actions
               </h3>
               {selectedCase.transactionsCount === 0 && selectedCase.tracedAmount === 'Pending analysis' ? (
                 <ol className="list-decimal list-inside text-slate-700 space-y-1 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-200">

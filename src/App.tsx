@@ -53,7 +53,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#f5f3ee]">
+    <div className="flex h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-[#f5f3ee]">
       {/* Left Sidebar */}
       <Sidebar />
 
@@ -61,8 +61,8 @@ const AppContent: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Topbar />
         
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-          <div className="max-w-6xl mx-auto">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-6xl min-w-0">
             {renderActivePage()}
           </div>
         </main>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   LayoutDashboard, 
   Briefcase, 
@@ -9,7 +9,9 @@ import {
   Shield, 
   Plus,
   Database,
-  ShieldCheck
+  ShieldCheck,
+  Menu,
+  X
 } from 'lucide-react';
 import { useInvestigation } from '../../context/InvestigationContext';
 import { ActivePage } from '../../types';
@@ -24,6 +26,7 @@ interface NavItem {
 
 export const Sidebar: React.FC = () => {
   const { activePage, navigateTo, alerts, currentRole, currentInvestigator } = useInvestigation();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const unreadAlertsCount = alerts.filter(a => !a.isRead).length;
   const isAdmin = currentRole === 'Admin';
   const isAnalyst = currentRole === 'User';
@@ -44,13 +47,37 @@ export const Sidebar: React.FC = () => {
   ];
 
   const visibleNavItems = navItems.filter(item => !item.adminOnly || isAdmin);
+  const navigate = (page: ActivePage) => {
+    navigateTo(page);
+    setIsMobileOpen(false);
+  };
 
   return (
-    <aside className="w-60 bg-[#0B1220] border-r border-[#1E293B] flex flex-col h-screen shrink-0 sticky top-0 text-slate-300 select-none z-40 no-print">
+    <>
+      <button
+        type="button"
+        onClick={() => setIsMobileOpen(true)}
+        aria-label="Open navigation"
+        aria-expanded={isMobileOpen}
+        className="fixed left-3 top-2.5 z-50 flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 md:hidden no-print"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
+      {isMobileOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={() => setIsMobileOpen(false)}
+          className="fixed inset-0 z-40 bg-slate-950/45 md:hidden no-print"
+        />
+      )}
+
+      <aside className={`fixed inset-y-0 left-0 z-50 flex h-[100dvh] w-60 flex-col border-r border-[#1E293B] bg-[#0B1220] text-slate-300 shadow-2xl transition-transform duration-200 md:sticky md:top-0 md:z-40 md:flex md:h-screen md:shrink-0 md:translate-x-0 md:shadow-none no-print ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       {/* Brand Header */}
       <div className="p-4 border-b border-[#1E293B]">
         <div 
-          onClick={() => navigateTo('dashboard')}
+          onClick={() => navigate('dashboard')}
           className="flex items-center gap-2.5 cursor-pointer group"
         >
           <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center text-white shadow-sm group-hover:bg-orange-500 transition-colors">
@@ -69,7 +96,7 @@ export const Sidebar: React.FC = () => {
         {/* Action: New Investigation */}
         {!isAnalyst && (
           <button
-            onClick={() => navigateTo('create-case')}
+            onClick={() => navigate('create-case')}
             className="mt-4 w-full py-2 px-3 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-[0.99]"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -90,7 +117,7 @@ export const Sidebar: React.FC = () => {
             return (
               <li key={item.id}>
                 <button
-                  onClick={() => navigateTo(item.id)}
+                  onClick={() => navigate(item.id)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors group cursor-pointer ${
                     isActive
                       ? 'bg-[#1c222c] text-white font-semibold'
@@ -133,6 +160,18 @@ export const Sidebar: React.FC = () => {
           )}
         </div>
       </div>
-    </aside>
+      </aside>
+
+      {isMobileOpen && (
+        <button
+          type="button"
+          onClick={() => setIsMobileOpen(false)}
+          aria-label="Close navigation"
+          className="fixed left-[13.5rem] top-2.5 z-[60] flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800 text-white hover:bg-slate-700 md:hidden no-print"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      )}
+    </>
   );
 };

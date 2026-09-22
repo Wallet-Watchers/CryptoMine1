@@ -57,7 +57,7 @@ export const FundFlowGraph: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {selectedCampaign && (
             <button
               onClick={() => navigateTo('case-detail', { caseId: selectedCase.id, tab: 'connections' })}
@@ -95,8 +95,8 @@ export const FundFlowGraph: React.FC = () => {
       {/* Case Jumper (global mode) */}
       {netMode === 'global' && (
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs text-xs">
-          <div className="flex items-center gap-2 mb-3">
-            <Waypoints className="w-4 h-4 text-purple-600" />
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <Waypoints className="w-4 h-4 text-purple-600 shrink-0" />
             <span className="font-bold text-slate-900">Global Cross-Case View</span>
             <span className="text-slate-500">— select an investigation to center the graph on its suspect wallets. Shared collector and VASP clusters stay fixed.</span>
           </div>
@@ -124,16 +124,16 @@ export const FundFlowGraph: React.FC = () => {
         <div className="p-4 bg-white border border-purple-200 rounded-xl shadow-2xs text-xs">
           <div className="flex flex-wrap items-center gap-3">
             <span className="font-bold text-slate-900 flex items-center gap-1.5">
-              <Waypoints className="w-4 h-4 text-purple-600" />
+              <Waypoints className="w-4 h-4 text-purple-600 shrink-0" />
               Shared / Overlapping Wallets
             </span>
             <span className="text-slate-600 text-[11px]">Addresses reused across multiple cases — highlighted in the network view below.</span>
           </div>
           <div className="flex flex-wrap gap-2 mt-2.5">
             {sharedWalletUsages.map(({ wallet, count, cases }) => (
-              <div key={wallet} className="px-3 py-1.5 rounded-lg bg-purple-50/60 border border-purple-200 flex items-center gap-2">
-                <span className="font-mono text-purple-900 font-bold">{wallet}</span>
-                <span className="text-[10px] text-purple-700">used by {count} case{count === 1 ? '' : 's'} ({cases.join(', ')})</span>
+              <div key={wallet} className="px-3 py-1.5 rounded-lg bg-purple-50/60 border border-purple-200 flex flex-wrap items-center gap-2">
+                <span className="font-mono text-purple-900 font-bold break-identifiers">{wallet}</span>
+                <span className="text-[10px] text-purple-700 break-words">used by {count} case{count === 1 ? '' : 's'} ({cases.join(', ')})</span>
               </div>
             ))}
           </div>

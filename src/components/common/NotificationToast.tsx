@@ -8,7 +8,7 @@ export const NotificationToastContainer: React.FC = () => {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    <div className="fixed bottom-3 left-3 right-3 z-50 flex w-auto max-w-sm flex-col gap-2 pointer-events-none sm:bottom-6 sm:left-auto sm:right-6 sm:w-full">
       {toasts.map((toast) => {
         const getIcon = () => {
           switch (toast.type) {

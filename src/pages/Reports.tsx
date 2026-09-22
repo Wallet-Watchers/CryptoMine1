@@ -115,7 +115,8 @@ export const Reports: React.FC = () => {
 
       {/* Reports Roster */}
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
-        <table className="w-full text-left text-xs border-collapse">
+        <div className="responsive-table">
+        <table className="w-full text-left text-xs border-collapse min-w-[52rem]">
           <thead>
             <tr className="border-b border-slate-200 text-slate-600 font-semibold bg-slate-50">
               <th className="py-3 px-4">Case Ref</th>
@@ -223,6 +224,7 @@ export const Reports: React.FC = () => {
             })}
           </tbody>
         </table>
+        </div>
       </div>
 
       {filtered.length === 0 && (

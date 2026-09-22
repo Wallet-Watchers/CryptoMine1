@@ -630,24 +630,24 @@ export const TransactionGraph: React.FC<{
   return (
     <div className={`relative w-full ${isFullscreen ? 'fixed inset-0 z-50 h-screen rounded-none' : `${height} rounded-xl`} bg-slate-900 border border-slate-800 overflow-hidden shadow-inner flex flex-col select-none`}>
       {/* Top Header & Graph HUD Controls */}
-      <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-2.5">
-        <div className="bg-slate-950/90 border border-slate-700/80 backdrop-blur-md px-3.5 py-2 rounded-lg text-slate-100 flex items-center gap-3 shadow-lg">
+      <div className="absolute top-3 left-3 right-3 md:top-4 md:left-4 md:right-4 z-20 flex flex-wrap items-center gap-2">
+        <div className="bg-slate-950/90 border border-slate-700/80 backdrop-blur-md px-3 py-2 rounded-lg text-slate-100 flex flex-wrap items-center gap-x-3 gap-y-1 shadow-lg min-w-0 max-w-full">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-orange-500 animate-ping" />
-            <span className="font-mono text-xs font-bold uppercase tracking-wider text-orange-400">
+            <span className="font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider text-orange-400">
               FUND FLOW TRACE
             </span>
           </div>
-          <span className="text-slate-600">|</span>
-          <span className="text-xs text-slate-300 font-mono">Case: {caseData.id}</span>
-          <span className="text-slate-600">|</span>
-          <span className="text-xs text-emerald-400 font-mono font-medium">{hasPendingAnalysis ? (hasTraced ? 'Traced — awaiting confirmation' : 'Pending analysis') : `${caseData.tracedAmount} Traced`}</span>
+          <span className="hidden sm:inline text-slate-600">|</span>
+          <span className="text-[11px] sm:text-xs text-slate-300 font-mono truncate">Case: {caseData.id}</span>
+          <span className="hidden sm:inline text-slate-600">|</span>
+          <span className="text-[11px] sm:text-xs text-emerald-400 font-mono font-medium">{hasPendingAnalysis ? (hasTraced ? 'Traced — awaiting confirmation' : 'Pending analysis') : `${caseData.tracedAmount} Traced`}</span>
         </div>
 
         {/* Action: Simulate Live Sweep */}
         {!hasPendingAnalysis && <button
           onClick={triggerLiveSweepSimulation}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg transition-all ${
+          className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg transition-all ${
             isSweeping 
               ? 'bg-orange-500 text-white animate-pulse' 
               : 'bg-slate-950/90 hover:bg-slate-800 text-orange-400 border border-slate-700/80'
@@ -658,67 +658,68 @@ export const TransactionGraph: React.FC<{
           <span>{isSweeping ? 'Sweeping Funds...' : 'Simulate Sweep Flow'}</span>
         </button>}
 
-        {/* View Options Toggle Buttons */}
-        <div className="bg-slate-950/80 border border-slate-700/70 backdrop-blur-md p-1 rounded-lg flex items-center gap-1 shadow-lg">
+        {/* View Options + Hop Depth Filters */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="bg-slate-950/80 border border-slate-700/70 backdrop-blur-md p-1 rounded-lg flex items-center gap-1 shadow-lg">
+            <button
+              onClick={() => setBranchesVisible(prev => !prev)}
+              className={`px-2.5 py-1 text-xs rounded font-medium flex items-center gap-1.5 transition-colors ${
+                branchesVisible ? 'bg-orange-600/90 text-white' : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Toggle cross-investigation multi-case flow convergence"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Campaign Links</span>
+            </button>
+          </div>
+
+          <div className="bg-slate-950/80 border border-slate-700/70 backdrop-blur-md px-2.5 py-1 rounded-lg flex items-center gap-2 shadow-lg text-xs text-slate-300">
+            <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span className="text-[11px] text-slate-400">Hops:</span>
+            <select
+              value={hopDepthFilter}
+              onChange={(e) => setHopDepthFilter(Number(e.target.value))}
+              className="bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-orange-400 font-mono outline-none"
+            >
+              <option value={4}>All (Hop 0-4)</option>
+              <option value={1}>1 Hop (Relay)</option>
+              <option value={2}>2 Hops (Transit)</option>
+              <option value={3}>3 Hops (Collector)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Floating Zoom and Navigation Tools */}
+        <div className="ml-auto flex items-center gap-1 bg-slate-950/90 border border-slate-700/80 backdrop-blur-md p-1 rounded-lg shadow-lg">
           <button
-            onClick={() => setBranchesVisible(prev => !prev)}
-            className={`px-2.5 py-1 text-xs rounded font-medium flex items-center gap-1.5 transition-colors ${
-              branchesVisible ? 'bg-orange-600/90 text-white' : 'text-slate-400 hover:text-slate-200'
-            }`}
-            title="Toggle cross-investigation multi-case flow convergence"
+            onClick={() => setZoom(z => Math.min(z + 0.15, 2.2))}
+            className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded transition-colors"
+            title="Zoom In"
           >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Campaign Links</span>
+            <ZoomIn className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setZoom(z => Math.max(z - 0.15, 0.5))}
+            className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded transition-colors"
+            title="Zoom Out"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </button>
+          <button
+            onClick={resetView}
+            className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded transition-colors"
+            title="Reset View & Recenter"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setIsFullscreen(prev => !prev)}
+            className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded transition-colors"
+            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Graph"}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
         </div>
-
-        {/* Hop Depth Filter Selector */}
-        <div className="bg-slate-950/80 border border-slate-700/70 backdrop-blur-md px-2.5 py-1 rounded-lg flex items-center gap-2 shadow-lg text-xs text-slate-300">
-          <Filter className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-[11px] text-slate-400">Hops:</span>
-          <select
-            value={hopDepthFilter}
-            onChange={(e) => setHopDepthFilter(Number(e.target.value))}
-            className="bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-orange-400 font-mono outline-none"
-          >
-            <option value={4}>All (Hop 0-4)</option>
-            <option value={1}>1 Hop (Relay)</option>
-            <option value={2}>2 Hops (Transit)</option>
-            <option value={3}>3 Hops (Collector)</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Floating Zoom and Navigation Tools */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-slate-950/90 border border-slate-700/80 backdrop-blur-md p-1 rounded-lg shadow-lg">
-        <button
-          onClick={() => setZoom(z => Math.min(z + 0.15, 2.2))}
-          className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded transition-colors"
-          title="Zoom In"
-        >
-          <ZoomIn className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => setZoom(z => Math.max(z - 0.15, 0.5))}
-          className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded transition-colors"
-          title="Zoom Out"
-        >
-          <ZoomOut className="w-4 h-4" />
-        </button>
-        <button
-          onClick={resetView}
-          className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded transition-colors"
-          title="Reset View & Recenter"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => setIsFullscreen(prev => !prev)}
-          className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded transition-colors"
-          title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Graph"}
-        >
-          {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-        </button>
       </div>
 
       {/* Interactive SVG Network Canvas */}
@@ -980,7 +981,7 @@ export const TransactionGraph: React.FC<{
       </div>
 
       {/* Automatic Tracing Controls */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 w-max max-w-[calc(100%-2rem)]">
+      <div className="absolute bottom-16 left-3 right-3 z-20 max-w-full md:bottom-4 md:left-1/2 md:right-auto md:w-max md:-translate-x-1/2 md:max-w-[calc(100%-2rem)]">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 bg-slate-950/90 border border-slate-700/80 backdrop-blur-md px-3.5 py-2 rounded-lg shadow-lg text-xs">
           <span className="text-[10px] font-bold text-orange-400 uppercase tracking-wider flex items-center gap-1.5">
             <Settings2 className="w-3 h-3" />
@@ -1042,7 +1043,7 @@ export const TransactionGraph: React.FC<{
       </div>
 
       {/* Bottom Classification Legend Bar */}
-      <div className="absolute bottom-4 left-4 z-20 flex flex-wrap items-center gap-2 bg-slate-950/90 border border-slate-700/80 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-lg">
+      <div className="absolute bottom-4 left-3 right-3 z-20 flex flex-wrap items-center justify-center gap-2 bg-slate-950/90 border border-slate-700/80 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-lg md:left-4 md:right-auto md:justify-start">
         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">EVIDENCE LAYER:</span>
         <EvidenceBadge classification="FACT" size="sm" />
         <EvidenceBadge classification="OBSERVATION" size="sm" />
@@ -1053,7 +1054,7 @@ export const TransactionGraph: React.FC<{
 
       {/* Side Inspector Drawer (Node or Edge Details) */}
       {(selectedNode || selectedEdge) && (
-        <div className="absolute top-4 right-4 bottom-4 w-84 bg-slate-950/95 border border-slate-800 text-slate-100 rounded-xl p-5 shadow-2xl z-30 flex flex-col overflow-y-auto backdrop-blur-md animate-in slide-in-from-right-4 duration-200">
+        <div className="absolute top-24 left-2 right-2 bottom-2 z-40 bg-slate-950/95 border border-slate-800 text-slate-100 rounded-xl p-4 sm:p-5 shadow-2xl flex flex-col overflow-y-auto backdrop-blur-md animate-in slide-in-from-bottom-2 duration-200 md:top-4 md:left-auto md:right-4 md:bottom-4 md:w-84 md:slide-in-from-right-4">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <span className="micro-label text-orange-400">
               {selectedNode ? 'NODE INSPECTOR' : 'TRANSACTION INSPECTOR'}

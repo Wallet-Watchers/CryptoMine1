@@ -40,7 +40,7 @@ export const Settings: React.FC = () => {
 
       {/* Investigator Profile Card */}
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-2xs space-y-5">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 bg-[#0f1217] text-white rounded-xl flex items-center justify-center font-mono font-bold text-lg">
               {currentInvestigator.name.split(' ').map((n: string) => n[0]).join('')}
@@ -60,7 +60,7 @@ export const Settings: React.FC = () => {
 
           <button
             onClick={logout}
-            className="px-3.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer self-start sm:self-auto"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>End Session</span>

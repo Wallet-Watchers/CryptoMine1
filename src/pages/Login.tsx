@@ -43,7 +43,7 @@ export const Login: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0d0f13] flex flex-col lg:flex-row text-slate-100 select-none">
       {/* Left Branding Hero Section */}
-      <div className="lg:w-7/12 p-8 lg:p-16 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#1e232d] relative bg-radial from-[#151922] via-[#0d0f13] to-[#090b0e]">
+      <div className="lg:w-7/12 p-6 sm:p-8 lg:p-16 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#1e232d] relative bg-radial from-[#151922] via-[#0d0f13] to-[#090b0e]">
         <div>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center text-white shadow-md">
@@ -77,7 +77,7 @@ export const Login: React.FC = () => {
             campaign linkages, intermediary layering detection, and downstream VASP attribution.
           </p>
 
-          <div className="mt-8 grid grid-cols-2 gap-4 text-xs">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div className="bg-slate-900/60 border border-slate-800 p-3.5 rounded-lg">
               <span className="micro-label text-slate-500">EVIDENCE STANDARD</span>
               <p className="text-slate-300 mt-1">Multi-tier classification across Facts, Observations, and Inferences.</p>
@@ -95,7 +95,7 @@ export const Login: React.FC = () => {
       </div>
 
       {/* Right Sign-in Form */}
-      <div className="lg:w-5/12 p-8 lg:p-16 flex flex-col justify-center bg-[#090b0e]">
+      <div className="lg:w-5/12 p-6 sm:p-8 lg:p-16 flex flex-col justify-center bg-[#090b0e]">
         <div className="max-w-md w-full mx-auto space-y-6">
           {stage === 'credentials' ? (
             <>
@@ -214,7 +214,7 @@ export const Login: React.FC = () => {
                       maxLength={1}
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
-                      className="w-11 h-12 text-center bg-slate-900/80 border border-slate-800 focus:border-orange-500 rounded-lg text-lg font-mono font-bold text-white outline-none transition-colors"
+                      className="w-9 h-11 sm:w-11 sm:h-12 text-center bg-slate-900/80 border border-slate-800 focus:border-orange-500 rounded-lg text-lg font-mono font-bold text-white outline-none transition-colors"
                     />
                   ))}
                 </div>

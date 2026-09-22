@@ -134,8 +134,8 @@ export const ComplaintAnalysis: React.FC = () => {
           <div className="p-5 space-y-3">
             {extractedFields.map((field) => (
               <div key={field.key} className="border border-slate-200 rounded-xl p-4 hover:border-slate-300 transition-colors bg-white space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="micro-label text-slate-500">{field.label}</span>
                     {field.verified ? (
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -196,7 +196,7 @@ export const ComplaintAnalysis: React.FC = () => {
                     </button>
                   </div>
                 ) : (
-                  <div className="font-mono text-sm font-bold text-slate-900 bg-slate-50 border border-slate-200/60 rounded-lg px-3 py-2 select-text">
+                  <div className="font-mono text-sm font-bold text-slate-900 bg-slate-50 border border-slate-200/60 rounded-lg px-3 py-2 select-text break-identifiers">
                     {field.value}
                   </div>
                 )}

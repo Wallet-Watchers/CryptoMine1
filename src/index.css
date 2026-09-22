@@ -119,10 +119,96 @@
     overflow-x: hidden;
   }
 
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button {
+    touch-action: manipulation;
+  }
+
   #root {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+  }
+
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    width: 100%;
+  }
+
+  img,
+  svg,
+  canvas,
+  video {
+    max-width: 100%;
+  }
+
+  input,
+  select,
+  textarea {
+    max-width: 100%;
+  }
+
+  table {
+    max-width: 100%;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    overflow-wrap: break-word;
+  }
+}
+
+/* Long hashes and identifiers should never force a narrow viewport wider. */
+.break-identifiers {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Dense investigation tables retain every column while scrolling inside the card. */
+.responsive-table {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.responsive-table > table {
+  min-width: 46rem;
+}
+
+/* Containers whose fixed/minimum widths would otherwise overflow small screens. */
+.min-w-0-all {
+  min-width: 0;
+}
+
+@media (max-width: 639px) {
+  .responsive-table {
+    margin-inline: -0.25rem;
+    padding-inline: 0.25rem;
+  }
+
+  .micro-label {
+    font-size: 0.6rem;
   }
 }
 

@@ -58,7 +58,7 @@ export const VASPAttribution: React.FC = () => {
           <div>
             <span className="micro-label text-emerald-700 font-bold">DOWNSTREAM DESTINATION ATTRIBUTION</span>
             <h3 className="text-base font-bold text-slate-900 mt-0.5">VASP Attribution Analysis</h3>
-            <div className="flex items-center gap-2 text-xs text-slate-600 mt-2">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 mt-2">
               <span className="font-semibold">Destination wallet under analysis:</span>
               <MonoText value={selectedCase.primaryWallet} />
             </div>
@@ -80,9 +80,9 @@ export const VASPAttribution: React.FC = () => {
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 LIKELY DESTINATION VASP
               </span>
-              <div className="flex items-baseline gap-3 mt-2">
-                <h4 className="text-3xl font-extrabold tracking-tight">{selectedVasp.name}</h4>
-                <span className="font-mono text-xl font-bold text-emerald-400">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mt-2">
+                <h4 className="text-2xl sm:text-3xl font-extrabold tracking-tight break-words">{selectedVasp.name}</h4>
+                <span className="font-mono text-lg sm:text-xl font-bold text-emerald-400">
                   {selectedVasp.confidence}% confidence
                 </span>
               </div>
@@ -209,7 +209,7 @@ export const VASPAttribution: React.FC = () => {
                   </div>
                   <EvidenceBadge classification="DERIVED" size="sm" />
                 </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 text-[11px] divide-x divide-y lg:divide-y-0 divide-slate-100">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 text-[11px] divide-y sm:divide-y-0 sm:divide-x divide-x-0 divide-slate-100">
                   <div className="p-3 space-y-1">
                     <span className="micro-label text-slate-500">Exchange</span>
                     <p className="font-bold text-slate-900">{selectedVasp.name} / {selectedVasp.clusterId}</p>
@@ -302,13 +302,13 @@ export const VASPAttribution: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {EVIDENCE_CHECKLIST.map((item) => (
             <div key={item.title} className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span className="font-semibold text-slate-900 text-xs">{item.title}</span>
-                </div>
-                <EvidenceBadge classification={item.classification} size="sm" />
+<div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="font-semibold text-slate-900 text-xs break-words">{item.title}</span>
               </div>
+              <EvidenceBadge classification={item.classification} size="sm" />
+            </div>
               <p className="text-[11px] text-slate-600 leading-relaxed">{item.description}</p>
             </div>
           ))}
@@ -343,12 +343,12 @@ export const VASPAttribution: React.FC = () => {
 
         <div className="space-y-2.5">
           {ALTERNATIVE_VASPS.map((alt) => (
-            <div key={alt.name} className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Building2 className="w-4 h-4 text-slate-500" />
-                <div>
+            <div key={alt.name} className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3 min-w-0">
+                <Building2 className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+                <div className="min-w-0">
                   <span className="font-semibold text-slate-900 text-xs">{alt.name}</span>
-                  <p className="text-[11px] text-slate-500">{alt.reason}</p>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">{alt.reason}</p>
                 </div>
               </div>
               <span className="font-mono text-sm font-bold text-slate-700 shrink-0">

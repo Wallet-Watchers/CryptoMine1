@@ -67,7 +67,7 @@ export const Monitoring: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
           <button
             onClick={() => setIsAddOpen(prev => !prev)}
             className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer shadow-2xs"
@@ -178,7 +178,7 @@ export const Monitoring: React.FC = () => {
               <div
                 key={w.address}
                 onClick={() => navigateTo('case-detail', { caseId: selectedCase.id, tab: 'overview', wallet: w.address })}
-                className="py-3 hover:bg-slate-50/80 px-2 rounded-lg cursor-pointer transition-colors flex items-center justify-between group"
+                className="py-3 hover:bg-slate-50/80 px-2 rounded-lg cursor-pointer transition-colors flex flex-col gap-1 items-start sm:flex-row sm:items-center sm:justify-between group"
               >
                 <div className="space-y-0.5">
                   <div className="font-mono font-bold text-slate-900 group-hover:text-orange-600">
@@ -210,14 +210,14 @@ export const Monitoring: React.FC = () => {
                 onClick={() => navigateTo('case-detail', { caseId: selectedCase.id, tab: 'monitoring', alertId: a.id })}
                 className="p-3.5 bg-slate-50/70 hover:bg-slate-50 border border-slate-200 rounded-lg cursor-pointer transition-colors space-y-1.5 group"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
                     <span className={`font-mono text-[10px] font-bold px-1.5 py-0.2 rounded ${
                       a.priority === 'HIGH' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
                     }`}>
                       {a.priority}
                     </span>
-                    <span className="font-bold text-xs text-slate-900 group-hover:text-orange-600 transition-colors">
+                    <span className="font-bold text-xs text-slate-900 group-hover:text-orange-600 transition-colors break-words">
                       {a.title}
                     </span>
                   </div>
@@ -228,7 +228,7 @@ export const Monitoring: React.FC = () => {
                   {a.description}
                 </p>
 
-                <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono pt-1 border-t border-slate-200/60">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 font-mono pt-1 border-t border-slate-200/60">
                   <span>Subject: {a.subject.slice(0, 12)}...</span>
                   <span className="text-orange-600 font-sans font-medium">Inspect Event →</span>
                 </div>

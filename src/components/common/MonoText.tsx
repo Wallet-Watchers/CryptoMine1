@@ -34,10 +34,10 @@ export const MonoText: React.FC<MonoTextProps> = ({
 
   return (
     <span 
-      className={`inline-flex items-center gap-1.5 font-mono text-xs text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-1.5 py-0.5 rounded transition-colors group select-all ${onClick ? 'cursor-pointer hover:border-slate-400' : ''} ${className}`}
+      className={`inline-flex max-w-full items-center gap-1.5 font-mono text-xs text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-1.5 py-0.5 rounded transition-colors group select-all ${onClick ? 'cursor-pointer hover:border-slate-400' : ''} ${className}`}
       onClick={onClick}
     >
-      <span>{formattedDisplay}</span>
+      <span className="min-w-0 break-identifiers">{formattedDisplay}</span>
       {copyable && (
         <button
           type="button"

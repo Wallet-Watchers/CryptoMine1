@@ -77,7 +77,7 @@ export const ComplaintAnalysisStepper: React.FC<ComplaintAnalysisStepperProps> =
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-orange-100 border border-orange-200 rounded-lg text-orange-700">
             <Cpu className="w-5 h-5 animate-pulse" />
@@ -114,28 +114,28 @@ export const ComplaintAnalysisStepper: React.FC<ComplaintAnalysisStepperProps> =
           return (
             <div
               key={step.id}
-              className={`flex items-center justify-between p-3 rounded-lg border text-xs transition-all ${
-                isDone
-                  ? 'bg-slate-50/80 border-slate-200 text-slate-800'
-                  : isCurrent
-                  ? 'bg-orange-50/80 border-orange-300 text-orange-950 shadow-xs'
-                  : 'bg-white border-slate-100 text-slate-400 opacity-60'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                    isDone
-                      ? 'bg-emerald-600 text-white'
-                      : isCurrent
-                      ? 'bg-orange-600 text-white animate-pulse'
-                      : 'bg-slate-200 text-slate-600'
-                  }`}
-                >
-                  {isDone ? '✓' : step.id}
+className={`flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-3 rounded-lg border text-xs transition-all ${
+                  isDone
+                    ? 'bg-slate-50/80 border-slate-200 text-slate-800'
+                    : isCurrent
+                    ? 'bg-orange-50/80 border-orange-300 text-orange-950 shadow-xs'
+                    : 'bg-white border-slate-100 text-slate-400 opacity-60'
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 ${
+                      isDone
+                        ? 'bg-emerald-600 text-white'
+                        : isCurrent
+                        ? 'bg-orange-600 text-white animate-pulse'
+                        : 'bg-slate-200 text-slate-600'
+                    }`}
+                  >
+                    {isDone ? '✓' : step.id}
+                  </div>
+                  <span className="font-medium break-words">{step.label}</span>
                 </div>
-                <span className="font-medium">{step.label}</span>
-              </div>
 
               <div>
                 {isDone && <span className="font-mono text-emerald-600 font-bold">READY</span>}

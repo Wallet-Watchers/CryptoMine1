@@ -98,7 +98,7 @@ export const AdminDatabase: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-xs border-collapse min-w-[52rem]">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-600 font-semibold bg-slate-50">
                   <th className="py-3 px-4">VASP Name</th>
@@ -168,7 +168,7 @@ export const AdminDatabase: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-xs border-collapse min-w-[52rem]">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-600 font-semibold bg-slate-50">
                   <th className="py-3 px-4">Wallet</th>

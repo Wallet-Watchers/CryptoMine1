@@ -103,17 +103,17 @@ export const ExplainabilityModal: React.FC<ExplainabilityModalProps> = ({
                 { factor: "Repeated consolidation", points: 14, category: "Dispersal", evidence: "Multiple tranches re-merged into a single collector wallet.", severity: "MEDIUM" },
                 { factor: "Known suspicious cluster", points: 10, category: "Correlation", evidence: "Address overlaps a flagged intelligence-database cluster.", severity: "MEDIUM" }
               ]).map((c, i) => (
-                <div key={i} className="p-3.5 bg-white hover:bg-slate-50/80 transition-colors flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm text-slate-900">{c.factor}</span>
+                <div key={i} className="p-3.5 bg-white hover:bg-slate-50/80 transition-colors flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-medium text-sm text-slate-900 break-words">{c.factor}</span>
                       <span className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">
                         {c.category}
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 leading-relaxed">{c.evidence}</p>
                   </div>
-                  <div className="text-right shrink-0">
+                  <div className="text-right shrink-0 justify-end">
                     <span className="font-mono text-base font-bold text-orange-600">+{c.points}</span>
                     <div className="text-[10px] text-slate-400">points</div>
                   </div>
@@ -153,8 +153,8 @@ export const ExplainabilityModal: React.FC<ExplainabilityModalProps> = ({
                 }
               ]).map((sig, i) => (
                 <div key={i} className="border border-slate-200 rounded-lg p-3.5 bg-white">
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="font-medium text-sm text-slate-900">{sig.title}</span>
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                    <span className="font-medium text-sm text-slate-900 break-words min-w-0">{sig.title}</span>
                     <EvidenceBadge classification={sig.classification} />
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">{sig.description}</p>

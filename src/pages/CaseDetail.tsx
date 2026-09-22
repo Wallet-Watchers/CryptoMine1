@@ -96,7 +96,7 @@ export const CaseDetail: React.FC = () => {
       <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                 {selectedCase.id}
               </span>
@@ -113,16 +113,16 @@ export const CaseDetail: React.FC = () => {
             <h1 className="text-xl font-bold tracking-tight text-slate-900">
               {selectedCase.title}
             </h1>
-            <div className="flex items-center gap-3 text-xs text-slate-500">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
               <span>Investigator: <strong className="text-slate-800 font-medium">{selectedCase.leadInvestigator}</strong></span>
-              <span>·</span>
+              <span className="hidden sm:inline">·</span>
               <span>Unit: {selectedCase.unit}</span>
-              <span>·</span>
+              <span className="hidden sm:inline">·</span>
               <span>Updated: {selectedCase.updatedAt}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start lg:self-auto shrink-0">
+          <div className="flex flex-wrap items-center gap-2 self-start lg:self-auto">
             <button
               onClick={() => setActiveCaseTab('fund-flow')}
               className="px-3.5 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
@@ -284,8 +284,8 @@ export const CaseDetail: React.FC = () => {
                   <div key={item.id} className="relative group text-xs">
                     <div className="absolute -left-5 top-1 w-3.5 h-3.5 rounded-full border-2 border-white bg-slate-800 ring-2 ring-slate-200 group-hover:ring-orange-500 transition-colors" />
                     <div className="bg-slate-50/70 p-3 rounded-lg border border-slate-200/70 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                      <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                        <div className="flex flex-wrap items-center gap-2 min-w-0">
                           <span className="font-mono font-bold text-slate-900">{item.title}</span>
                           <span className="text-slate-400 font-mono text-[10px]">{item.date} {item.time && `· ${item.time}`}</span>
                         </div>
@@ -397,7 +397,7 @@ export const CaseDetail: React.FC = () => {
             </div>
 
             {/* Clean, Readable Graph Flow */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 overflow-x-auto text-slate-100 select-none">
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-8 overflow-x-auto text-slate-100 select-none">
               <div className="min-w-[840px] flex items-center justify-between relative py-6">
                 {/* Node 1: Victim Source */}
                 <div className="flex flex-col items-center space-y-2 relative z-10">
@@ -624,7 +624,7 @@ export const CaseDetail: React.FC = () => {
               {crossPlatformCorrelation ? (
                 <div className="p-4 space-y-4">
                   {/* Evidence provenance */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 border border-slate-200 rounded-lg overflow-hidden bg-white divide-x divide-y lg:divide-y-0 divide-slate-100 text-[11px]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border border-slate-200 rounded-lg overflow-hidden bg-white divide-x divide-y sm:divide-y-0 divide-slate-100 text-[11px]">
                     <div className="p-3 space-y-1">
                       <span className="micro-label text-slate-500">Evidence Source</span>
                       <p className="font-medium text-slate-800">{crossPlatformCorrelation.evidenceSource}</p>
@@ -817,7 +817,7 @@ export const CaseDetail: React.FC = () => {
 
             <div className="divide-y divide-slate-100 text-xs">
               {monitoredCaseWallets.map((wallet) => (
-                <div key={wallet.address} className="py-3 flex items-center justify-between">
+                <div key={wallet.address} className="py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <div className="font-mono font-bold text-slate-900">{wallet.shortAddress}</div>
                     <span className="text-[11px] text-slate-500">{wallet.label}</span>
@@ -839,8 +839,8 @@ export const CaseDetail: React.FC = () => {
               <div className="space-y-2.5">
                 {caseAlerts.map((a) => (
                   <div key={a.id} className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2 min-w-0">
                         <span className={`font-mono text-[10px] font-bold px-1.5 py-0.2 rounded ${
                           a.priority === 'HIGH' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
                         }`}>
@@ -865,7 +865,7 @@ export const CaseDetail: React.FC = () => {
       {/* ========================================================================= */}
       {activeCaseTab === 'report' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between no-print">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
             <span className="text-xs text-slate-500">{selectedCase.tracedAmount === 'Pending analysis' ? 'On-chain analysis is pending. This dossier will be populated once fund tracing is complete.' : 'Formal Evidence Package ready for judicial submission or law-enforcement export.'}</span>
             <div className="flex items-center gap-2">
               <button
@@ -886,10 +886,10 @@ export const CaseDetail: React.FC = () => {
           </div>
 
           {/* Clean Printable Dossier */}
-          <div className="bg-white border border-slate-300 rounded-xl p-8 lg:p-10 shadow-sm text-slate-900 space-y-8 report-page">
+          <div className="bg-white border border-slate-300 rounded-xl p-5 sm:p-8 lg:p-10 shadow-sm text-slate-900 space-y-8 report-page">
             {/* Header */}
             <div className="border-b-2 border-slate-900 pb-5 space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <span className="font-mono text-sm font-extrabold tracking-widest uppercase block text-slate-900">
                     CRYPTOMINE
@@ -898,13 +898,13 @@ export const CaseDetail: React.FC = () => {
                     Financial Crime & Crypto Fraud Intelligence Platform
                   </span>
                 </div>
-                <div className="text-right font-mono text-xs text-slate-600">
+                <div className="text-left sm:text-right font-mono text-xs text-slate-600">
                   <div>Date: <strong>{selectedCase.updatedAt}</strong></div>
                   <div>Case Ref: <strong className="text-slate-900">{selectedCase.id}</strong></div>
                 </div>
               </div>
 
-              <div className="pt-2 flex items-baseline justify-between">
+              <div className="pt-2 flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900">{selectedCase.title}</h2>
                   <span className="text-xs text-slate-500 font-mono">{selectedCase.blockchain} Network · {selectedCase.reportedAmount}</span>
@@ -944,7 +944,7 @@ export const CaseDetail: React.FC = () => {
               <h3 className="font-bold text-slate-900 uppercase tracking-wider text-xs border-b border-slate-200 pb-1">
                 3. Network & Campaign Findings
               </h3>
-              <p className="text-slate-700 leading-relaxed flex items-center gap-2">
+              <p className="text-slate-700 leading-relaxed flex flex-wrap items-center gap-2">
                 {selectedCampaign ? <>This case is linked to <strong className="text-slate-900">{selectedCampaign.name} ({selectedCampaign.id} · {selectedCampaign.confidence}% confidence)</strong>, with {linkedCases.length} other recorded case{linkedCases.length === 1 ? '' : 's'} sharing the campaign infrastructure.</> : 'No campaign correlation has been recorded for this case.'}
                 {selectedCampaign && <EvidenceBadge classification="DERIVED" size="sm" />}
               </p>
@@ -955,7 +955,7 @@ export const CaseDetail: React.FC = () => {
               <h3 className="font-bold text-slate-900 uppercase tracking-wider text-xs border-b border-slate-200 pb-1">
                 4. Possible VASP Attribution
               </h3>
-              <p className="text-slate-700 leading-relaxed flex items-center gap-2">
+              <p className="text-slate-700 leading-relaxed flex flex-wrap items-center gap-2">
                 {selectedVasp ? <>Destination analysis identifies <strong className="text-slate-900">{selectedVasp.name} (Cluster {selectedVasp.clusterId} · {selectedVasp.confidence}% confidence)</strong>. Attribution is probabilistic and requires formal law-enforcement information request (LEIR) for verification.</> : 'No VASP attribution has been recorded for this case.'}
                 {selectedVasp && <EvidenceBadge classification="POSSIBLE" size="sm" />}
               </p>
@@ -996,12 +996,12 @@ export const CaseDetail: React.FC = () => {
             </div>
 
             {/* Footer Sign-off */}
-            <div className="pt-6 border-t-2 border-slate-900 flex items-center justify-between text-xs text-slate-600 font-mono">
-              <div className="flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-slate-700" />
+            <div className="pt-6 border-t-2 border-slate-900 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-xs text-slate-600 font-mono">
+              <div className="flex flex-wrap items-center gap-2 min-w-0">
+                <UserCheck className="w-4 h-4 text-slate-700 shrink-0" />
                 <span>Investigator: <strong>{CURRENT_INVESTIGATOR.name}</strong> ({CURRENT_INVESTIGATOR.unit})</span>
               </div>
-              <div>Status: <strong>{selectedCase.tracedAmount === 'Pending analysis' ? 'PENDING ON-CHAIN ANALYSIS' : 'EVIDENCE REPORT GENERATED'}</strong></div>
+              <div className="break-identifiers">Status: <strong>{selectedCase.tracedAmount === 'Pending analysis' ? 'PENDING ON-CHAIN ANALYSIS' : 'EVIDENCE REPORT GENERATED'}</strong></div>
             </div>
           </div>
         </div>

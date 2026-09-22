@@ -90,17 +90,17 @@ export const RiskAnalysisModal: React.FC<RiskAnalysisModalProps> = ({
 
           <div className="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-200">
             {contributorList.map((c, i) => (
-              <div key={i} className="p-3.5 bg-white hover:bg-slate-50/80 transition-colors flex items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm text-slate-900">{c.factor}</span>
+              <div key={i} className="p-3.5 bg-white hover:bg-slate-50/80 transition-colors flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="space-y-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium text-sm text-slate-900 break-words">{c.factor}</span>
                     <span className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">
                       {c.category}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 leading-relaxed">{c.evidence}</p>
                 </div>
-                <div className="text-right shrink-0 flex items-center gap-3">
+                <div className="text-right shrink-0 flex items-center gap-3 justify-end">
                   <RiskBadge level={c.severity} showScore={false} size="sm" />
                   <span className="font-mono text-base font-bold text-orange-600">+{c.points}</span>
                 </div>

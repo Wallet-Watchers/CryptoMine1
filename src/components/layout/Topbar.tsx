@@ -26,6 +26,7 @@ export const Topbar: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -36,6 +37,7 @@ export const Topbar: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsSearchOpen(false);
+        setIsMobileSearchOpen(false);
       }
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setIsNotifOpen(false);
@@ -83,17 +85,17 @@ export const Topbar: React.FC = () => {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <header className="h-14 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30 shadow-2xs no-print">
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b border-slate-200 bg-white py-0 pl-14 pr-3 shadow-2xs sm:px-6 no-print">
       {/* Left: Breadcrumbs */}
-      <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+      <div className="flex min-w-0 flex-1 items-center gap-1.5 text-xs font-medium text-slate-500">
         {breadcrumbs.map((crumb, idx) => (
           <React.Fragment key={idx}>
-            {idx > 0 && <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
+            {idx > 0 && <ChevronRight className="hidden h-3.5 w-3.5 shrink-0 text-slate-400 sm:block" />}
             <span
               className={
                 idx === breadcrumbs.length - 1
-                  ? 'text-slate-900 font-semibold font-mono'
-                  : 'hover:text-slate-800 cursor-pointer'
+                  ? 'min-w-0 truncate font-mono font-semibold text-slate-900'
+                  : 'hidden cursor-pointer hover:text-slate-800 sm:inline'
               }
               onClick={() => {
                 if (idx === 0) {
@@ -111,7 +113,18 @@ export const Topbar: React.FC = () => {
       </div>
 
       {/* Center: Global Search Input */}
-      <div ref={searchRef} className="relative w-80 lg:w-96">
+      <button
+        type="button"
+        onClick={() => {
+          setIsMobileSearchOpen(true);
+          setIsSearchOpen(true);
+        }}
+        aria-label="Search cases and wallets"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 md:hidden"
+      >
+        <Search className="h-4 w-4" />
+      </button>
+      <div ref={searchRef} className={`fixed left-3 right-3 top-[3.75rem] z-50 w-auto md:relative md:inset-auto md:z-auto md:w-80 lg:w-96 ${isMobileSearchOpen ? 'block' : 'hidden md:block'}`}>
         <div className="relative">
           <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -130,6 +143,7 @@ export const Topbar: React.FC = () => {
               onClick={() => {
                 setSearchQuery('');
                 setIsSearchOpen(false);
+                setIsMobileSearchOpen(false);
               }}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
             >
@@ -140,7 +154,7 @@ export const Topbar: React.FC = () => {
 
         {/* Live Search Suggestions Dropdown */}
         {isSearchOpen && searchQuery.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl p-2 text-xs max-h-80 overflow-y-auto z-50 animate-in fade-in duration-100">
+          <div className="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-[60dvh] overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 text-xs shadow-xl animate-in fade-in duration-100">
             {totalResults === 0 ? (
               <div className="py-4 text-center text-slate-400">
                 <p>No matching cases or wallets for "{searchQuery}"</p>
@@ -156,6 +170,7 @@ export const Topbar: React.FC = () => {
                         onClick={() => {
                           navigateTo('case-detail', { caseId: c.id });
                           setIsSearchOpen(false);
+                          setIsMobileSearchOpen(false);
                           setSearchQuery('');
                         }}
                         className="p-2 hover:bg-slate-50 rounded-lg cursor-pointer flex items-center justify-between transition-colors"
@@ -182,6 +197,7 @@ export const Topbar: React.FC = () => {
                         onClick={() => {
                           navigateTo('case-detail', { caseId: 'CM-2026-0017', tab: 'fund-flow' });
                           setIsSearchOpen(false);
+                          setIsMobileSearchOpen(false);
                           setSearchQuery('');
                         }}
                         className="p-2 hover:bg-slate-50 rounded-lg cursor-pointer flex items-center justify-between transition-colors"
@@ -205,7 +221,7 @@ export const Topbar: React.FC = () => {
       </div>
 
       {/* Right Controls: Notifications & Investigator Identity */}
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-3">
         {/* Notifications Popover */}
         <div ref={notifRef} className="relative">
           <button
@@ -220,7 +236,7 @@ export const Topbar: React.FC = () => {
           </button>
 
           {isNotifOpen && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-slate-200 rounded-xl shadow-xl p-3 z-50 animate-in fade-in duration-100">
+            <div className="fixed left-3 right-3 top-16 z-50 max-h-[calc(100dvh-5rem)] overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-xl animate-in fade-in duration-100 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:max-h-80 sm:w-80">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <span className="micro-label text-slate-500">RECENT SURVEILLANCE ALERTS</span>
                 <button

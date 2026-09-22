@@ -73,7 +73,7 @@ export const Overview: React.FC = () => {
 
       {/* Active Primary Investigation Card */}
       <div className="bg-white border border-slate-300 rounded-xl p-6 shadow-sm space-y-5">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <span className="micro-label text-orange-700 font-bold">
             ACTIVE INVESTIGATION
           </span>
@@ -168,14 +168,14 @@ export const Overview: React.FC = () => {
                 onClick={() => navigateTo('case-detail', { caseId: leadCase.id, tab: 'monitoring', alertId: alert.id })}
                 className="p-3 bg-slate-50/70 hover:bg-slate-50 border border-slate-200/80 rounded-lg cursor-pointer transition-colors space-y-1 group"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
                     <span className={`font-mono text-[10px] font-bold px-1.5 py-0.2 rounded ${
                       alert.priority === 'HIGH' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
                     }`}>
                       {alert.priority}
                     </span>
-                    <span className="font-bold text-xs text-slate-900 group-hover:text-orange-600 transition-colors">
+                    <span className="font-bold text-xs text-slate-900 group-hover:text-orange-600 transition-colors break-words">
                       {alert.title}
                     </span>
                   </div>
